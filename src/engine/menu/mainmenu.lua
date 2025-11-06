@@ -1,4 +1,4 @@
----@class MainMenu
+---@class MainMenu : StateManagedClass
 local MainMenu = {}
 
 MainMenu.BACKGROUND_SHADER = love.graphics.newShader([[
@@ -121,6 +121,7 @@ function MainMenu:enter()
     })
 
     GitFinder:fetchLatestCommit(function(status, body, headers)
+        if status < 200 or status >= 300 then return end
         local current_commit = GitFinder:fetchCurrentCommit()
         if current_commit ~= body then
             self.ver_string = "v" .. tostring(Kristal.Version)
@@ -130,6 +131,11 @@ function MainMenu:enter()
             self.ver_string = self.ver_string .. " (outdated!)"
         end
     end)
+
+    if TARGET_MOD then
+        self.selected_mod = self.mod_list:getSelectedMod()
+        self.selected_mod_button = self.mod_list:getSelectedButton()
+    end
 end
 
 function MainMenu:leave()

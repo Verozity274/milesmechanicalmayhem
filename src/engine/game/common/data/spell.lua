@@ -5,7 +5,7 @@
 ---@class Spell : Class
 ---
 ---@field name string           The display name of the spell
----@field cast_name string?     The disaply name of the spell when cast (optional)
+---@field cast_name string?     The display name of the spell when cast (optional)
 ---
 ---@field effect string         The battle description of the spell
 ---@field description string    The overworld menu description of the spell
@@ -19,6 +19,9 @@
 --- Tags are used to identify properties of the spell that can be checked by other pieces of code for certain effects, For example: \
 --- The built in tag `spare_tired` will cause the spell to be highlighted if an enemy is TIRED
 ---@field tags string[]
+---
+---@field cast_anim string      The name of the animation set when the spell is cast - defaults to "battle/spell"
+---@field select_anim string    The name of the animation set when the spell is selected - defaults to "battle/spell_ready"
 ---
 ---@overload fun(...) : Spell
 local Spell = Class()
@@ -72,7 +75,7 @@ function Spell:onWorldCast(chara) end
 ---@param tag string
 ---@return boolean
 function Spell:hasTag(tag)
-    return Utils.containsValue(self.tags, tag)
+    return TableUtils.contains(self.tags, tag)
 end
 
 --- *(Override)* Gets the message that appears when this spell is cast in battle
@@ -81,6 +84,18 @@ end
 ---@return string
 function Spell:getCastMessage(user, target)
     return "* "..user.chara:getName().." cast "..self:getCastName().."!"
+end
+
+--- *(Override)* Gets the animation that is set when this spell is cast in battle
+--- @return string
+function Spell:getCastAnimation()
+    return self.cast_anim or "battle/spell"
+end
+
+--- *(Override)* Gets the animation that is set when this spell is selected in battle
+--- @return string
+function Spell:getSelectAnimation()
+    return self.select_anim or "battle/spell_ready"
 end
 
 --- *(Override)* Called when the spell is cast \
@@ -98,7 +113,7 @@ end
 ---@param target Battler[]|EnemyBattler|PartyBattler|EnemyBattler[]|PartyBattler[]
 function Spell:onStart(user, target)
     Game.battle:battleText(self:getCastMessage(user, target))
-    user:setAnimation("battle/spell", function()
+    user:setAnimation(self:getCastAnimation(), function()
         Game.battle:clearActionIcon(user)
         local result = self:onCast(user, target)
         if result or result == nil then

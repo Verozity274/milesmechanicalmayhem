@@ -20,8 +20,8 @@
 ---@overload fun(...) : Forcefield
 local Forcefield, super = Class(Event)
 
-function Forcefield:init(x, y, w, h, properties)
-    super.init(self, x, y, w, h)
+function Forcefield:init(x, y, shape, properties)
+    super.init(self, x, y, shape)
 
     self.end_sprite = Assets.getFramesOrTexture("world/events/forcefield/end")
     self.middle_sprite = Assets.getFramesOrTexture("world/events/forcefield/middle")
@@ -123,7 +123,7 @@ function Forcefield:update()
             dist_y = math.min(math.abs(player.y - self.y), math.abs(player.y - (self.y + self.height)))
         end
 
-        local fade_dist = Utils.clamp(math.max(dist_x, dist_y), 20, 80)
+        local fade_dist = MathUtils.clamp(math.max(dist_x, dist_y), 20, 80)
 
         self.alpha = 1 - (fade_dist - 20) / 60
     end
