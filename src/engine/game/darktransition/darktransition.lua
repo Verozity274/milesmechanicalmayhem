@@ -63,6 +63,8 @@ function DarkTransition:init(final_y, options)
     --self.kris_y = options["kris_y"] or 94
     --self.susie_x = options["susie_x"] or 162
     --self.susie_y = options["susie_y"] or 86
+    --self.noelle_x = options["noelle_x"] or 196
+    --self.noelle_y = options["noelle_y"] or 78
 
     self.sprite_index = 0
     self.linecon = false
@@ -83,8 +85,6 @@ function DarkTransition:init(final_y, options)
     self.quick_mode = options["quick_mode"]
     self.skiprunback = options["skiprunback"]
     self.has_head_object = options["has_head_object"]
-
-    self.draw_doorblack = options["draw_doorblack"]
 
     if self.quick_mode == nil then self.quick_mode = false end
     if self.skiprunback == nil then self.skiprunback = false end
@@ -299,7 +299,7 @@ function DarkTransition:draw()
                 --snd_free_all()
                 if (not self.skiprunback) then
                     --snd_play(snd_locker)
-                    Assets.playSound("locker")
+                    Assets.playSound()
 
                     self.doorblack = 1
                 end
@@ -327,7 +327,7 @@ function DarkTransition:draw()
                 data.sprite_1:stop()
             end
             self.do_once = true
-            Assets.playSound("locker")
+            Assets.playSound()
             -- Destroy the dark door object here...
             self.doorblack = 1
             self.sprite_index = 0
@@ -386,11 +386,7 @@ function DarkTransition:draw()
             local y2 = self.ry2
             local w = x2 - x1
             local h = y2 - y1
-            if (self.draw_doorblack) then
-                self.draw_doorblack(x1, y1, w, h)
-            else
-                love.graphics.rectangle("fill", x1, y1, w, h)
-            end
+            love.graphics.rectangle("fill", x1, y1, w, h)
             --self:draw_rectangle((self.rx1 + self:camerax()), (self.ry1 + self:cameray()), (self.rx2 + self:camerax()), (self.ry2 + self:cameray()), false)
         end
     end

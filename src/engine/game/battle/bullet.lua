@@ -139,9 +139,7 @@ function Bullet:update()
     super.update(self)
 
     if self.remove_offscreen then
-        local size = self.width + self.height
-        local x, y = self:getScreenPos()
-        if x < -size or y < -size or x > SCREEN_WIDTH + size or y > SCREEN_HEIGHT + size then
+        if self.x < -100 or self.y < -100 or self.x > SCREEN_WIDTH + 100 or self.y > SCREEN_HEIGHT + 100 then
             self:remove()
         end
     end

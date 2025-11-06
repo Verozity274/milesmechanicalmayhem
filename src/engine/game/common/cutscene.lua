@@ -4,11 +4,9 @@
 ---@see LegendCutscene  # For functions specific to legend cutscene scripts.
 ---
 ---@class Cutscene : Class
----@overload fun(func: fun(cutscene: Cutscene, ...), ...) : Cutscene
+---@overload fun(...) : Cutscene
 local Cutscene, super = Class()
 
----@param func fun(cutscene: Cutscene, ...)
----@param ... unknown
 function Cutscene:init(func, ...)
     self.wait_timer = 0
     self.wait_func = nil
@@ -26,12 +24,6 @@ function Cutscene:init(func, ...)
     self:resume(self, ...)
 end
 
----@param getter fun(...) : fun(...)|nil
----@param cutscene fun(...)|string
----@param id? string
----@param ... unknown
----@return fun(...) cutscene
----@return table args
 function Cutscene:parseFromGetter(getter, cutscene, id, ...)
     self.getter = getter
     if type(cutscene) == "function" then
@@ -213,7 +205,6 @@ function Cutscene:resume(...)
     self.wait_func = nil
     local ok, msg = coroutine.resume(self.coroutine, ...)
     if not ok then
-        COROUTINE_TRACEBACK = debug.traceback(self.coroutine)
         error(msg)
     end
 end

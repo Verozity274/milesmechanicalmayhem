@@ -22,7 +22,7 @@ end
 
 function MainMenu:enter()
     -- Load menu music
-    self.music = Music() -- "mod_menu", 1, 0.95
+    self.music = Music("the_holy", 1, 0.95)
 
     Kristal.showBorder(0.5)
 
@@ -32,7 +32,6 @@ function MainMenu:enter()
     self.background_alpha = 0
 
     -- Assets required for the background animation
-    self.background_image_wave = Assets.getTexture("kristal/title_bg_wave")
     self.background_image_animation = Assets.getFrames("kristal/title_bg_anim")
 
     -- Initialize variables for the menu

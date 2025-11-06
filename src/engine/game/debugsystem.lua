@@ -1,15 +1,4 @@
 ---@class DebugSystem : Object
----
----@field flag_type             string          The current flag filter setting for value type
----@field flag_query            { [1]: string } The current flag filter query 
----@field flag_filter_mode      string          The current flag filter mode
----
----@field temp_flag_type        string          Temporary version of [`flag_type`](lua://DebugSystem.flag_type). Only set as filter once the settings are saved.
----@field temp_flag_query       { [1]: string } Temporary version of [`flag_query`](lua://DebugSystem.flag_query). Only set as filter once the settings are saved.
----@field temp_flag_filter_mode string          Temporary version of [`flag_filter_mode`](lua://DebugSystem.flag_filter_mode). Only set as filter once the settings are saved.
----
----@field filtered_flags_list   string[]        A list of filtered flag keys that should show in the flags menu
----
 ---@overload fun(...) : DebugSystem
 local DebugSystem, super = Class(Object)
 
@@ -85,16 +74,6 @@ function DebugSystem:init()
     self.playing_sound = nil
     self.old_music_volume = 1
     self.music_needs_reset = false
-
-    self.flag_type = "any"
-    self.flag_query = { "" }
-    self.flag_filter_mode = "pattern" -- Types available: "pattern", "invert_pattern", "startsWith", "invert_startsWith"
-
-    self.temp_flag_type = nil
-    self.temp_flag_query = { "" }
-    self.temp_flag_filter_mode = nil
-
-    self.filtered_flags_list = {}
 end
 
 function DebugSystem:getStage()
@@ -338,18 +317,11 @@ function DebugSystem:refresh()
     self.exclusive_menus["OVERWORLD"] = {"encounter_select", "select_shop", "select_map", "cutscene_select", "legend_select"}
     self.exclusive_menus["LEGEND"] = {"legend_select"}
     self.exclusive_menus["BATTLE"] = {"wave_select"}
-    self:registerMenu("main", "~ KRISTAL DEBUG ~")
+    self:registerMenu("main", "~ MILES MECHANICAL MAYHEM DEBUG ~")
     self.current_menu = "main"
     self:registerDefaults()
     self:registerSubMenus()
     Kristal.callEvent(KRISTAL_EVENT.registerDebugOptions, self)
-    self:setFlagFilterDefaults()
-end
-
-function DebugSystem:setFlagFilterDefaults()
-    self.flag_type = Kristal.getModOption("defaultFlagFilterType") or "any"
-    self.flag_query = { Kristal.getModOption("defaultFlagFilterQuery") or "" }
-    self.flag_filter_mode = Kristal.getModOption("defaultFlagFilterMode") or "pattern"
 end
 
 function DebugSystem:addToExclusiveMenu(state, id)
@@ -418,9 +390,8 @@ function DebugSystem:enterMenu(menu, soul, skip_history)
     end
 end
 
-function DebugSystem:startTextInput(tbl)
-    tbl = tbl or self.search
-    TextInput.attachInput(tbl, {
+function DebugSystem:startTextInput()
+    TextInput.attachInput(self.search, {
         multiline = false,
         enter_submits = true,
         clear_after_submit = false
@@ -519,12 +490,26 @@ function DebugSystem:registerSubMenus()
                         function ()
                             Kristal.Config["fps"] = 0; FRAMERATE = 0
                         end)
-    for _,fps in ipairs({30, 60, 120, 144, 165, 240}) do
-        self:registerOption("engine_option_fps", fps, "Set the target FPS to "..fps..".",
-                            function ()
-                                Kristal.Config["fps"] = fps; FRAMERATE = fps
-                            end)
-    end
+    self:registerOption("engine_option_fps", "30", "Set the target FPS to 30.",
+                        function ()
+                            Kristal.Config["fps"] = 30; FRAMERATE = 30
+                        end)
+    self:registerOption("engine_option_fps", "60", "Set the target FPS to 60.",
+                        function ()
+                            Kristal.Config["fps"] = 60; FRAMERATE = 60
+                        end)
+    self:registerOption("engine_option_fps", "120", "Set the target FPS to 120.",
+                        function ()
+                            Kristal.Config["fps"] = 120; FRAMERATE = 120
+                        end)
+    self:registerOption("engine_option_fps", "144", "Set the target FPS to 144.",
+                        function ()
+                            Kristal.Config["fps"] = 144; FRAMERATE = 144
+                        end)
+    self:registerOption("engine_option_fps", "240", "Set the target FPS to 240.",
+                        function ()
+                            Kristal.Config["fps"] = 240; FRAMERATE = 240
+                        end)
     self:registerOption("engine_option_fps", "Custom", "Set the target FPS to a custom value.", function ()
         self.window = DebugWindow("Enter FPS", "Enter the target FPS youd like.", "input", function (text)
             local fps = tonumber(text)
@@ -542,12 +527,38 @@ function DebugSystem:registerSubMenus()
     self:registerOption("fast_forward", "[Toggle]", 
                         function () return self:appendBool("Speed up the engine.", FAST_FORWARD) end,
                         function () FAST_FORWARD = not FAST_FORWARD end)
-    for _,speed in ipairs({0.05, 0.1, 0.2, 0.5, 1.5, 2, 5, 10}) do
-        self:registerOption("fast_forward", "x"..speed, "Set the fast forward speed to x"..speed.." multiplier.",
-                            function ()
-                                FAST_FORWARD_SPEED = speed
-                            end)
-    end
+    self:registerOption("fast_forward", "x0.05", "Set the fast forward speed to x0.05 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 0.05
+                        end)
+    self:registerOption("fast_forward", "x0.1", "Set the fast forward speed to x0.1 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 0.1
+                        end)
+    self:registerOption("fast_forward", "x0.2", "Set the fast forward speed to x0.2 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 0.2
+                        end)
+    self:registerOption("fast_forward", "x0.5", "Set the fast forward speed to x0.5 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 0.5
+                        end)
+    self:registerOption("fast_forward", "x1.5", "Set the fast forward speed to x1.5 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 1.5
+                        end)
+    self:registerOption("fast_forward", "x2", "Set the fast forward speed to x2 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 2
+                        end)
+    self:registerOption("fast_forward", "x5", "Set the fast forward speed to x5 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 5
+                        end)
+    self:registerOption("fast_forward", "x10", "Set the fast forward speed to x10 multiplier.",
+                        function ()
+                            FAST_FORWARD_SPEED = 10
+                        end)
     self:registerOption("fast_forward", "Back", "Go back to the previous menu.", function () self:returnMenu() end)
 
     self:registerMenu("give_item", "Give Item", "search")
@@ -706,31 +717,13 @@ function DebugSystem:registerSubMenus()
             else
                 Game:addPartyMember(id)
                 if Game.world.player then
-                    Game.world:spawnFollower(Game.party_data[id]:getActor(), {party = id})
+                    Game.world:spawnFollower(Game.party_data[id]:getActor())
                 else
                     local x, y = Game.world.camera:getPosition()
-                    Game.world:spawnPlayer(x, y, Game.party_data[id]:getActor(), id)
+                    Game.world:spawnPlayer(x, y, Game.party_data[id]:getActor())
                 end
             end
         end)
-    end
-    
-    self:registerMenu("border_menu", "Border Test", "search")
-    
-    local borders = Utils.getFilesRecursive("assets/sprites/borders", ".png")
-    if Mod then
-        Utils.merge(borders, Utils.getFilesRecursive(Mod.info.path.."/assets/sprites/borders", ".png"))
-        for _,mod_lib in pairs(Mod.libs) do
-            Utils.merge(borders, Utils.getFilesRecursive(mod_lib.info.path.."/assets/sprites/borders", ".png"))
-        end
-    end
-
-    for key, value in pairs(Registry.borders) do
-        table.insert(borders, key)
-    end
-
-    for _,border in ipairs(Utils.removeDuplicates(borders)) do
-        self:registerOption("border_menu", border, "Switch to the border \"" .. border .. "\".", function() Game:setBorder(border) end)
     end
 end
 
@@ -797,10 +790,6 @@ function DebugSystem:registerDefaults()
     self:registerOption("main", "Change Party", "Enter the party change menu.", function ()
                             self:enterMenu("change_party", 0)
                         end, in_game)
-                        
-    self:registerOption("main", "Border Test", "Enter the border test menu.", function() 
-                            self:enterMenu("border_menu", 0)
-                        end, function() return in_game() and Kristal.Config["borders"] == "dynamic" end)
 
     -- World specific
     self:registerOption("main", "Select Map", "Switch to a new map.", function ()
@@ -917,45 +906,11 @@ function DebugSystem:onStateChange(old, new)
     elseif new == "FLAGS" then
         self.heart_target_x = 19
         self.heart_target_y = 35 + 32
-        if old ~= "FLAG_FILTERS" then
-            self.current_subselecting = self.current_selecting
-        end
+        self.current_subselecting = self.current_selecting
         self.current_selecting = 1
 
         self.circle_anim_timer = 0
-
-        if Game.flags then
-            local flags = Utils.getKeys(Game.flags)
-            if self.flag_type ~= "any" then
-                flags = Utils.filter(flags, function (v)
-                    return type(Game:getFlag(v)) == self.flag_type
-                end)
-            end
-            if self.flag_query and self.flag_query[1] ~= "" then
-                local invert, mode = Utils.startsWith(self.flag_filter_mode, "invert_")
-                if mode == "pattern" then
-                    flags = Utils.filter(flags, function (v)
-                        local cond = string.match(v, self.flag_query[1])
-                        return invert and not cond or cond and not invert
-                    end)
-                elseif mode == "startsWith" then
-                    flags = Utils.filter(flags, function (v)
-                        local cond = Utils.startsWith(v, self.flag_query[1])
-                        return invert and not cond or cond and not invert
-                    end)
-                end
-            end
-            self.filtered_flags_list = Utils.copy(flags)
-        end
-
         OVERLAY_OPEN = true
-    elseif new == "FLAG_FILTERS" then
-        self.temp_flag_type = self.flag_type
-        self.temp_flag_filter_mode = self.flag_filter_mode
-        self.temp_flag_query = Utils.copy(self.flag_query)
-        -- Force update TextInput to start showing current query
-        self:startTextInput(self.temp_flag_query)
-        TextInput.endInput()
     end
 
     self:fadeMusicIn()
@@ -965,21 +920,16 @@ function DebugSystem:onStateChange(old, new)
     end
 end
 
----@param options table|number
 function DebugSystem:updateBounds(options)
     local is_search = (self.menus[self.current_menu].type == "search")
     if self.state == "FLAGS" then
         is_search = false
     end
 
-    if type(options) == "table" then
-        options = #options
-    end
-
     local limit = is_search and 0 or 1
-    if self.current_selecting < limit then self.current_selecting = options end
-    if self.current_selecting > options then self.current_selecting = limit end
-    if self.state == "MENU" or self.state == "FLAGS" or self.state == "FLAG_FILTERS" then
+    if self.current_selecting < limit then self.current_selecting = #options end
+    if self.current_selecting > #options then self.current_selecting = limit end
+    if self.state == "MENU" or self.state == "FLAGS" then
         self.heart_target_x = 19
 
         local y_off = (self.current_selecting - 1) * 32
@@ -1002,9 +952,6 @@ function DebugSystem:updateBounds(options)
             self.heart_target_y = self.heart_target_y - 32 + 16 - self.menu_target_y
             self.menu_target_y = 0
         end
-    end
-    if self.state == "FLAG_FILTERS" and self.current_selecting >= 4 then
-        self.heart_target_y = self.heart_target_y + 32
     end
 end
 
@@ -1104,128 +1051,41 @@ function DebugSystem:onKeyPressed(key, is_repeat)
             return
         end
     elseif self.state == "FLAGS" then
-        if not Game.flags then
-            self:setState("MENU")
-            self:refresh()
-            return
-        end
-        if Input.isCancel(key) and not is_repeat then
-            Assets.playSound("ui_move")
-            self:setState("MENU")
-            self.current_selecting = self.current_subselecting
-            return
-        elseif Input.isConfirm(key) then
-            if self.current_selecting == 1 then
+        if Game.flags then
+            if Input.isCancel(key) and not is_repeat then
                 Assets.playSound("ui_select")
-                self:setState("FLAG_FILTERS")
-            else
-                local keys = self.filtered_flags_list
-                local flag_name = keys[self.current_selecting - 1]
-                if type(Game:getFlag(flag_name)) == "boolean" then
-                    Game:setFlag(flag_name, not Game:getFlag(flag_name))
-                    Assets.playSound("ui_select")
-                elseif type(Game:getFlag(flag_name)) == "number" then
-                    self.window = DebugWindow("Edit Flag (number) - \"".. flag_name .."\"", "Enter a new value for this flag.", "input", function (text)
-                        local num = tonumber(text)
-                        if num then
-                            Game:setFlag(flag_name, num)
-                            Assets.playSound("ui_select")
-                        else
-                            Assets.playSound("ui_cant_select")
-                        end
-                    end)
-                    self.window:setPosition(Input.getCurrentCursorPosition())
-                    self:addChild(self.window)
-                    self.window.input_lines[1] = Game:getFlag(flag_name)
-                    TextInput.cursor_x = string.len(Game:getFlag(flag_name))
-                    Assets.playSound("ui_select")
-                elseif type(Game:getFlag(flag_name)) == "string" then
-                    self.window = DebugWindow("Edit Flag (string) - \"".. flag_name .."\"", "Enter a new value for this flag.", "input", function (text)
-                        Game:setFlag(flag_name, text)
-                        Assets.playSound("ui_select")
-                    end)
-                    self.window:setPosition(Input.getCurrentCursorPosition())
-                    self.window.input_lines[1] = Game:getFlag(flag_name)
-                    TextInput.cursor_x = string.len(Game:getFlag(flag_name))
-                    self:addChild(self.window)
+                self:setState("MENU")
+                self.current_selecting = self.current_subselecting
+                return
+            elseif Input.isConfirm(key) then
+                local keys = Utils.getKeys(Game.flags)
+                if type(Game:getFlag(keys[self.current_selecting])) == "boolean" then
+                    Game:setFlag(keys[self.current_selecting], not Game:getFlag(keys[self.current_selecting]))
                     Assets.playSound("ui_select")
                 else
                     Assets.playSound("ui_cant_select")
                 end
             end
-        end
 
-        local counter = 0
-        for _,flag in ipairs(self.filtered_flags_list) do
-            counter = counter + 1
-        end
-        counter = counter + 1
-
-        if Input.is("down", key) and (not is_repeat or self.current_selecting < counter) then
-            Assets.playSound("ui_move")
-            self.current_selecting = self.current_selecting + 1
-        end
-        if Input.is("up", key) and (not is_repeat or self.current_selecting > 1) then
-            Assets.playSound("ui_move")
-            self.current_selecting = self.current_selecting - 1
-        end
-        self:updateBounds(#self.filtered_flags_list + 1)
-    elseif self.state == "FLAG_FILTERS" then
-        if Input.isCancel(key) and not is_repeat then
-            Assets.playSound("ui_cancel")
-            self:setState("FLAGS")
-        elseif Input.isConfirm(key) then
-            -- Flag type
-            if self.current_selecting == 1 then
-                local types = {"any", "boolean", "string", "number"}
-                local current_index = Utils.getIndex(types, self.temp_flag_type) or 0
-                local new_index = Utils.clampWrap(current_index + 1, #types)
-                local new = types[new_index]
-                self.temp_flag_type = new
-                Assets.playSound("ui_select")
-            -- Filter query
-            elseif self.current_selecting == 2 then
-                -- Start TextInput but remove the down to cancel input
-                self:startTextInput(self.temp_flag_query)
-                TextInput.pressed_callback = nil
-                Assets.playSound("ui_select")
-            -- Filter type
-            elseif self.current_selecting == 3 then
-                local types = {"pattern", "invert_pattern", "startsWith", "invert_startsWith"}
-                local current_index = Utils.getIndex(types, self.temp_flag_filter_mode) or 0
-                local new_index = Utils.clampWrap(current_index + 1, #types)
-                local new = types[new_index]
-                self.temp_flag_filter_mode = new
-                Assets.playSound("ui_select")
-            -- Reset Filter
-            elseif self.current_selecting == 4 then
-                self.temp_flag_type = "any"
-                self.temp_flag_query = { "" }
-                self.temp_flag_filter_mode = "pattern"
-                self.current_selecting = 1
-                Assets.playSound("impact")
-                -- Force update TextInput
-                self:startTextInput(self.temp_flag_query)
-                TextInput.endInput()
-            -- Save and Return
-            elseif self.current_selecting == 5 then
-                self.flag_type = self.temp_flag_type
-                self.flag_filter_mode = self.temp_flag_filter_mode
-                self.flag_query = Utils.copy(self.temp_flag_query)
-                Assets.playSound("ui_select")
-                self:setState("FLAGS")
+            local counter = 0
+            for _,flag in pairs(Game.flags) do
+                counter = counter + 1
             end
+            
+            if Input.is("down", key) and (not is_repeat or self.current_selecting < counter) then
+                Assets.playSound("ui_move")
+                self.current_selecting = self.current_selecting + 1
+            end
+            if Input.is("up", key) and (not is_repeat or self.current_selecting > 1) then
+                Assets.playSound("ui_move")
+                self.current_selecting = self.current_selecting - 1
+            end
+            self:updateBounds(Utils.getKeys(Game.flags))
+        else
+            self:setState("MENU")
+            self:refresh()
+            return
         end
-
-        if Input.is("down", key) and (not is_repeat or self.current_selecting < 5) then
-            Assets.playSound("ui_move")
-            self.current_selecting = self.current_selecting + 1
-        end
-        if Input.is("up", key) and (not is_repeat or self.current_selecting > 1) then
-            Assets.playSound("ui_move")
-            self.current_selecting = self.current_selecting - 1
-        end
-        self:updateBounds(5)
     end
 end
 
@@ -1514,97 +1374,19 @@ function DebugSystem:draw()
         Draw.setColor(1, 1, 1, 1)
 
         local name = "Press CANCEL to go back."
-        if self.current_selecting == 1 then
-            name = "Set a filter to customise what flags are shown."
-        end
 
         Draw.pushScissor()
         Draw.scissor(text_offset + 19, y_off + menu_y + 16, 640, 320 + 48)
-        self:printShadow("Filter Settings", text_offset + 19, y_off + menu_y + 16 + self.menu_y)
         if Game.flags then
-            for index, key in pairs(self.filtered_flags_list) do
-                local print_key,   key_sx   = Utils.squishAndTrunc(key                      , self.font, 480 - 32, 1, 0.6, "...")
-                local print_value, value_sx = Utils.squishAndTrunc(tostring(Game.flags[key]), self.font, 160 - 32, 1, 0.6, "...")
-                self:printShadow(print_key   , text_offset + 19, y_off + menu_y + index * 32 + 16 + self.menu_y,
-                                     nil           , nil    , nil, key_sx  )
-                self:printShadow(print_value, 480 + 16         , y_off + menu_y + index * 32 + 16 + self.menu_y,
-                                     { 1, 1, 1, 1 }, "right", nil, value_sx)
+            for index, key in pairs(Utils.getKeys(Game.flags)) do
+                self:printShadow(key, text_offset + 19, y_off + menu_y + (index - 1) * 32 + 16 + self.menu_y)
+                self:printShadow(tostring(Game.flags[key]), -16, y_off + menu_y + (index - 1) * 32 + 16 + self.menu_y,
+                                 { 1, 1, 1, 1 }, "right", 640)
             end
         end
         Draw.popScissor()
 
         self:printShadow(name, 0, 480 - 32, COLORS.gray, "center", 640)
-    elseif self.state == "FLAG_FILTERS" then
-        header_name = "~ FLAG EDITOR - FILTER SETTINGS ~"
-        Draw.setColor(0, 0, 0, 0.5)
-        love.graphics.rectangle("fill", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
-
-        Draw.setColor(1, 1, 1, 1)
-
-        self:printShadow("Flag type:"     , text_offset + 19, y_off + menu_y + 16 + 32*0 + self.menu_y)
-        self:printShadow("Filter query:"  , text_offset + 19, y_off + menu_y + 16 + 32*1 + self.menu_y)
-        self:printShadow("Filter Mode:"   , text_offset + 19, y_off + menu_y + 16 + 32*2 + self.menu_y)
-        self:printShadow("Reset Filter"   , text_offset + 19, y_off + menu_y + 16 + 32*4 + self.menu_y)
-        self:printShadow("Save and Return", text_offset + 19, y_off + menu_y + 16 + 32*5 + self.menu_y)
-
-        local name = "Press CANCEL to go back without saving."
-        local name_offset = 0
-        -- Flag type
-        if self.current_selecting == 1 then
-            if self.temp_flag_type == "any" then
-                name = "Shows all flag types."
-            else
-                name = "Shows only " .. self.temp_flag_type .. " flags."
-            end
-        -- Filter query
-        elseif self.current_selecting == 2 then
-            name = "A query to filter flags by.\nSet FILTER MODE to change how this value is used."
-            name_offset = -32
-        -- Filter mode
-        elseif self.current_selecting == 3 then
-            local invert, mode = Utils.startsWith(self.temp_flag_filter_mode, "invert_")
-            if mode == "pattern" then
-                name = "Filters to " .. (invert and "hide" or "show") .. " flags whose names match to\nthe FILTER QUERY"
-            elseif mode == "startsWith" then
-                name = "Filters to " .. (invert and "hide" or "show") .. " flags whose names start with\nthe FILTER QUERY"
-            end
-            name_offset = -32
-        -- Reset Filter
-        elseif self.current_selecting == 4 then
-            name = "Resets the filter to it's default settings."
-        end
-
-        self:printShadow(self.temp_flag_type       , -16, y_off + menu_y + 16 + 32*0 + self.menu_y,
-                             {1, 1, 1, 1}, "right", 640)
-        self:printShadow(self.temp_flag_filter_mode, -16, y_off + menu_y + 16 + 32*2 + self.menu_y,
-                             {1, 1, 1, 1}, "right", 640)
-
-        -- Draw underline for TextInput
-        local line_width = 320
-        local x = 320 - 16
-        local y = y_off + menu_y + 16 + 32 + self.menu_y
-
-        love.graphics.setLineWidth(2)
-        local line_x  = x
-        local line_x2 = line_x + line_width
-        local line_y  = 32 - 4 - 1 + 2
-        Draw.setColor(0, 0, 0, 1)
-        love.graphics.line(line_x + 2, y + line_y + 2, line_x2 + 2, y + line_y + 2)
-        Draw.setColor(COLORS.silver)
-        love.graphics.line(line_x, y + line_y, line_x2, y + line_y)
-
-        -- Draw TextInput itself
-        TextInput.draw({
-            x = x,
-            y = y,
-            font = self.font,
-            print = function (text, x, y)
-                local text, scale = Utils.squishAndTrunc(text, self.font, 320, 1, 0.4, "...")
-                self:printShadow(text, x, y, nil, nil, nil, scale)
-            end,
-        })
-
-        self:printShadow(name, 0, 480 - 32 + name_offset, COLORS.gray, "center", 640)
     elseif self.state == "SELECTION" or (self.old_state == "SELECTION" and self.state == "IDLE" and (menu_alpha > 0)) then
         header_name = "~ OBJECT SELECTION ~"
 
@@ -1764,16 +1546,16 @@ function DebugSystem:draw()
     super.draw(self)
 end
 
-function DebugSystem:printShadow(text, x, y, color, align, limit, sx, sy)
+function DebugSystem:printShadow(text, x, y, color, align, limit)
     color = color or { 1, 1, 1, 1 }
     -- Draw the shadow, offset by two pixels to the bottom right
     love.graphics.setFont(self.font)
     Draw.setColor({ 0, 0, 0, color[4] })
-    love.graphics.printf(text, x + 2, y + 2, limit or self.font:getWidth(text), align or "left", 0, sx or 1, sy or 1)
+    love.graphics.printf(text, x + 2, y + 2, limit or self.font:getWidth(text), align or "left")
 
     -- Draw the main text
     Draw.setColor(color)
-    love.graphics.printf(text, x, y, limit or self.font:getWidth(text), align or "left", 0, sx or 1, sy or 1)
+    love.graphics.printf(text, x, y, limit or self.font:getWidth(text), align or "left")
 end
 
 return DebugSystem

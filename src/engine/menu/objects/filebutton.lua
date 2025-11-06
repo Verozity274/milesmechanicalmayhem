@@ -28,12 +28,10 @@ function FileButton:setData(data)
     self.area = data and data.room_name or "------------"
 
     if data and data.playtime then
-        local hours = math.floor(data.playtime / 3600)
-        local minutes = math.floor(data.playtime / 60 % 60)
+        local minutes = math.floor(data.playtime / 60)
         local seconds = math.floor(data.playtime % 60)
-        self.time = string.format("%d:%02d:%02d", hours, minutes, seconds)
+        self.time = string.format("%d:%02d", minutes, seconds)
     else
-        -- Don't ask why it's not "--:--:--" -- ask Toby
         self.time = "--:--"
     end
 end
@@ -101,7 +99,7 @@ function FileButton:draw()
         love.graphics.print(self.name, 50, 10)
 
         -- Draw the time shadow
-        local time_x = self.width-64-self.font:getWidth(self.time) + 2
+        local time_x = self.width-64-self.font:getWidth(self.time)
         Draw.setColor(0, 0, 0)
         love.graphics.print(self.time, time_x + 2, 10 + 2)
         -- Draw the time

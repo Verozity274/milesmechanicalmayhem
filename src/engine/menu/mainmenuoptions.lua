@@ -128,7 +128,7 @@ function MainMenuOptions:draw()
     local title_width = menu_font:getWidth(title)
 
     Draw.setColor(COLORS.silver)
-    Draw.printShadow("( OPTIONS )", 0, 0, 2, "center", 640)
+    Draw.printShadow("( PREFERENCES )", 0, 0, 2, "center", 640)
 
     Draw.setColor(1, 1, 1)
     Draw.printShadow(title, 0, 48, 2, "center", 640)
@@ -526,8 +526,10 @@ end
 function MainMenuOptions:initializeOptions()
     self:registerOptionsPage("general", "GENERAL")
     self:registerOptionsPage("graphics", "GRAPHICS")
+    if Kristal.Config["allclear_scene"] then
     self:registerOptionsPage("engine", "ENGINE")
-
+    end
+    
     ---------------------
     -- General Options
     ---------------------
@@ -546,7 +548,7 @@ function MainMenuOptions:initializeOptions()
 
     self:registerConfigOption("general", "Auto-Run", "autoRun")
 
-    self:registerConfigOption("general", "Discord RPC", "discordRPC", function(toggled)
+    self:registerConfigOption("general", "Discord RPC (W.I.P)", "discordRPC", function(toggled)
         if DISCORD_RPC_AVAILABLE then
             if toggled then
                 DiscordRPC.initialize(DISCORD_RPC_ID, true)
@@ -596,26 +598,20 @@ function MainMenuOptions:initializeOptions()
         love.window.setVSync(toggled and 1 or 0)
     end)
     self:registerConfigOption("graphics", "Frame Skip", "frameSkip")
+    self:registerConfigOption("graphics", "Skip Intro", "skipIntro")
+    self:registerConfigOption("graphics", "Display FPS", "showFPS")
 
     ---------------------
     -- Engine Options
     ---------------------
-
-    self:registerConfigOption("engine", "Skip Intro", "skipIntro")
+    if Kristal.Config["allclear_scene"] then
     self:registerConfigOption("engine", "Display FPS", "showFPS")
-
-    self:registerOption("engine", "Default Name", function ()
-                            return Kristal.Config["defaultName"]
-                        end, function ()
-                            self.menu:pushState("DEFAULTNAME")
-                        end)
-    self:registerConfigOption("engine", "Skip Name Entry", "skipNameEntry")
-
-    self:registerConfigOption("engine", "Debug Hotkeys", "debug")
+      self:printShadow("Debug Hotkeys",     menu_x, menu_y + (32 * 14))
+            offset = 0
     self:registerConfigOption("engine", "Verbose Loader", "verboseLoader")
     self:registerConfigOption("engine", "Use System Mouse", "systemCursor", function () Kristal.updateCursor() end)
     self:registerConfigOption("engine", "Always Show Mouse", "alwaysShowCursor", function () Kristal.updateCursor() end)
-    self:registerConfigOption("engine", "Instant Quit", "instantQuit")
+end
 end
 
 return MainMenuOptions

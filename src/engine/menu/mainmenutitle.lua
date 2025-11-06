@@ -14,7 +14,7 @@ local MainMenuTitle, super = Class(StateClass)
 function MainMenuTitle:init(menu)
     self.menu = menu
 
-    self.logo = Assets.getTexture("kristal/title_logo_shadow")
+    self.logo = Assets.getTexture("kristal/titlemmm")
 
     self.selected_option = 1
 end
@@ -34,10 +34,12 @@ function MainMenuTitle:onEnter(old_state)
 
     if TARGET_MOD then
         self.options = {
-            {"play",    self.has_target_saves and "Load game" or "Start game"},
-            {"options", "Options"},
+            {"play",    self.has_target_saves and "Start Adventure (DEMO)" or "Start Adventure (DEMO)"},
+            {"options", "Preferences"},
             {"credits", "Credits"},
-            {"quit",    "Quit"},
+            {"website", "Youtube Channel"},
+            {"website2", "Discord Server"},
+            {"quit",    "Quit DEMO"},
         }
     else
         self.options = {
@@ -55,7 +57,7 @@ function MainMenuTitle:onEnter(old_state)
         self.menu.selected_mod_button = nil
     end
 
-    self.menu.heart_target_x = 196
+    self.menu.heart_target_x = 35
     self.menu.heart_target_y = 238 + 32 * (self.selected_option - 1)
 end
 
@@ -78,18 +80,19 @@ function MainMenuTitle:onKeyPressed(key, is_repeat)
             end
 
         elseif option == "modfolder" then
-            -- FIXME: the game might freeze when using love.system.openURL to open a file directory
-            if (love.system.getOS() == "Windows") then
-                os.execute('start /B \"\" \"'..love.filesystem.getSaveDirectory()..'/mods\"')
-            else
-                love.system.openURL("file://"..love.filesystem.getSaveDirectory().."/mods")
-            end
+            love.system.openURL("file://"..love.filesystem.getSaveDirectory().."/mods")
 
         elseif option == "options" then
             self.menu:setState("OPTIONS")
 
         elseif option == "credits" then
             self.menu:setState("CREDITS")
+
+        elseif option == "website" then
+            love.system.openURL("https://www.youtube.com/@MilesGAddison")
+
+        elseif option == "website2" then
+            love.system.openURL("https://discord.com/invite/x2Skkj4mu7")
 
         elseif option == "wiki" then
             love.system.openURL("https://kristal.cc/wiki")
@@ -113,18 +116,18 @@ function MainMenuTitle:onKeyPressed(key, is_repeat)
         Assets.stopAndPlaySound("ui_move")
     end
 
-    self.menu.heart_target_x = 196
+    self.menu.heart_target_x = 35
     self.menu.heart_target_y = 238 + (self.selected_option - 1) * 32
 end
 
 function MainMenuTitle:draw()
     local logo_img = self.menu.selected_mod and self.menu.selected_mod.logo or self.logo
 
-    Draw.draw(logo_img, SCREEN_WIDTH/2 - logo_img:getWidth()/2, 105 - logo_img:getHeight()/2)
-    --Draw.draw(self.selected_mod and self.selected_mod.logo or self.logo, 160, 70)
-
+    Draw.draw(logo_img, SCREEN_WIDTH/2 - logo_img:getWidth()/1.3, 105 - logo_img:getHeight()/2.2, 0, 1.6, 1.6)
+  --Draw.draw(self.selected_mod and self.selected_mod.logo or self.logo, 160, 70)
+    
     for i, option in ipairs(self.options) do
-        Draw.printShadow(option[2], 215, 219 + 32 * (i - 1))
+        Draw.printShadow(option[2], 53, 219 + 32 * (i - 1))
     end
 end
 
@@ -137,7 +140,7 @@ function MainMenuTitle:selectOption(id)
         if options[1] == id then
             self.selected_option = i
 
-            self.menu.heart_target_x = 196
+            self.menu.heart_target_x = 35
             self.menu.heart_target_y = 238 + (self.selected_option - 1) * 32
 
             return true

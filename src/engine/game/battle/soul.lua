@@ -50,8 +50,6 @@
 ---@field can_move          boolean         Whether the player is able to move the soul
 ---@field allow_focus       boolean         Whether the player is able to focus with the soul (hold Cancel key for 1/2 speed)
 ---
----@field target_alpha      number?         The target alpha of the soul
----
 ---@overload fun(x?:number, y?:number, color?: table) : Soul
 local Soul, super = Class(Object)
 
@@ -132,8 +130,6 @@ function Soul:init(x, y, color)
 
     self.can_move = true
     self.allow_focus = true
-
-    self.target_alpha = nil
 end
 
 ---@param parent Object
@@ -422,11 +418,6 @@ function Soul:onSquished(solid)
     solid:onSquished(self)
 end
 
---- *(Override)* Called when the soul grazes something.
----@param bullet Bullet
----@param old_graze boolean
-function Soul:onGraze(bullet, old_graze) end
-
 --- Called every frame from within [`Soul:update()`](lua://Soul.update) if the soul is able to move. \
 --- Movement for the soul based on player input should be controlled within this method.
 function Soul:doMovement()
@@ -501,7 +492,6 @@ function Soul:update()
         end
         if self.inv_timer == 0 then
             if bullet.tp ~= 0 and bullet:collidesWith(self.graze_collider) then
-                local old_graze = bullet.grazed
                 if bullet.grazed then
                     Game:giveTension(bullet.tp * DT * self.graze_tp_factor)
                     if Game.battle.wave_timer < Game.battle.wave_length - (1/3) then
@@ -519,7 +509,6 @@ function Soul:update()
                     self.graze_sprite.timer = 1/3
                     bullet.grazed = true
                 end
-                self:onGraze(bullet, old_graze)
             end
         end
     end

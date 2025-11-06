@@ -44,16 +44,15 @@ function Console:createEnv()
     end
 
     function env.print(...)
-        local arg = {n = select("#", ...), ...}
+        local arg = {...}
         local print_string = ""
 
-        for i = 1, arg.n do
-            local str = arg[i]
+        for i, str in ipairs(arg) do
             if type(str) == "table" then
                 str = Utils.dump(str)
             end
             print_string = print_string .. tostring(str)
-            if i ~= arg.n then
+            if i ~= #arg then
                 print_string = print_string  .. "    "
             end
         end
@@ -359,8 +358,8 @@ end
 function Console:unsafeRun(str)
     local chunk, err = loadstring(str)
     if chunk then
-        rawset(self.env, "selected", Kristal.DebugSystem.object)
-        rawset(self.env, "_", Kristal.DebugSystem.object)
+        self.env.selected = Kristal.DebugSystem.object
+        self.env["_"] = Kristal.DebugSystem.object
         setfenv(chunk,self.env)
         self:push(chunk())
     else

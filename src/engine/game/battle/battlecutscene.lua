@@ -2,14 +2,11 @@
 --- These cutscene scripts will receive a BattleCutscene as their first argument.
 ---
 ---@class BattleCutscene : Cutscene
----@overload fun(group: string, id?: string, ...) : BattleCutscene
+---@overload fun(...) : BattleCutscene
 local BattleCutscene, super = Class(Cutscene)
 
 local function _true() return true end
 
----@param group fun(cutscene: Cutscene, ...)
----@param id? string
----@param ... unknown
 function BattleCutscene:init(group, id, ...)
     local scene, args = self:parseFromGetter(Registry.getBattleCutscene, group, id, ...)
 
