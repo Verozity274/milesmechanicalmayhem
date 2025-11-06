@@ -20,7 +20,6 @@ function LegendCutscene:init(group, id, ...)
 
     self.text_objects = {}
 
-    ---@enum (key) LegendCutscene.text_position
     self.text_positions = {
         ["far_left"       ] = {80 , 320},
         ["far_right"      ] = {440, 320},
@@ -36,7 +35,7 @@ function LegendCutscene:init(group, id, ...)
 
     self.speed = 1
 
-    super.init(self, scene, ...)
+    super:init(self, scene, ...)
 end
 
 function LegendCutscene:update()
@@ -65,7 +64,7 @@ end
 
 --- Writes some text at the given coordinates on the screen.
 ---@param text  string  The text to display.
----@param pos   LegendCutscene.text_position|table   A table of the x and y coordinates to start writing the text at. See `LegendCutscene.text_positions` for a set of default text positions.
+---@param pos   table   A table of the x and y coordinates to start writing the text at. See `LegendCutscene.text_positions` for a set of default text positions.
 ---@return DialogueText dialogue
 function LegendCutscene:text(text, pos)
     local x, y = unpack(self.text_positions[pos])

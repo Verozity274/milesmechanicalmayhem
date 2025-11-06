@@ -39,6 +39,3 @@ OVERLAY_OPEN = false
 NOCLIP = false
 
 REGISTRY_LOADED = false
-
----@type string?
-COROUTINE_TRACEBACK = nil

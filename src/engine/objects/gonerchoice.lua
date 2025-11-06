@@ -30,7 +30,7 @@ function GonerChoice:init(x, y, choices, on_complete, on_select)
     self.soul = Sprite("player/heart_blur")
     self.soul:setScale(2, 2)
     self.soul:setColor(Kristal.getSoulColor())
-	if Kristal.getState() ~= Game and MainMenu.mod_list:getSelectedMod().soulColor then
+	if MainMenu.mod_list:getSelectedMod().soulColor and Kristal.getState() ~= Game then
 		self.soul:setColor(unpack(MainMenu.mod_list:getSelectedMod().soulColor))
 	end
     self.soul.alpha = 0.6
@@ -178,13 +178,13 @@ end
 
 function GonerChoice:update()
     if self.state == "FADEIN" then
-        self.alpha = MathUtils.approach(self.alpha, 1, 0.1 * DTMULT)
+        self.alpha = Utils.approach(self.alpha, 1, 0.1 * DTMULT)
 
         if self.alpha == 1 then
             self.state = "CHOICE"
         end
     elseif self.state == "FADEOUT" then
-        self.alpha = MathUtils.approach(self.alpha, 0, 0.1 * DTMULT)
+        self.alpha = Utils.approach(self.alpha, 0, 0.1 * DTMULT)
 
         if self.alpha <= 0 then
             local choice = self:getChoice(self.selected_x, self.selected_y)
@@ -264,8 +264,8 @@ function GonerChoice:finish(callback)
 end
 
 function GonerChoice:clampSelection()
-    self.selected_x = MathUtils.clamp(self.selected_x, 1, #self.choices[self.selected_y])
-    self.selected_y = MathUtils.clamp(self.selected_y, 1, #self.choices)
+    self.selected_x = Utils.clamp(self.selected_x, 1, #self.choices[self.selected_y])
+    self.selected_y = Utils.clamp(self.selected_y, 1, #self.choices)
 end
 
 function GonerChoice:resetSize()
@@ -308,14 +308,14 @@ function GonerChoice:moveSelection(x, y, dx, dy)
     local choice
     repeat
         if self.wrap_y then
-            y = MathUtils.wrapIndex(y, #self.choices)
+            y = Utils.clampWrap(y, 1, #self.choices)
         else
-            y = MathUtils.clamp(y, 1, #self.choices)
+            y = Utils.clamp(y, 1, #self.choices)
         end
         if self.wrap_x then
-            x = MathUtils.wrapIndex(x, #self.choices[y])
+            x = Utils.clampWrap(x, 1, #self.choices[y])
         else
-            x = MathUtils.clamp(x, 1, #self.choices[y])
+            x = Utils.clamp(x, 1, #self.choices[y])
         end
 
         choice = self.choices[y][x]

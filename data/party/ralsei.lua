@@ -16,12 +16,8 @@ function character:init()
     -- Default title / class (saved to the save file)
     if Game.chapter == 1 then
         self.title = "Lonely Prince\nDark-World being.\nHas no subjects."
-    elseif Game.chapter == 2 then
-        self.title = "Dark Prince\nDark-World being.\nHas friends now."
-    elseif Game.chapter == 3 then
-        self.title = "Dark Prince\nDark-World being.\nHas friends."
     else
-        self.title = "Dark Hero\nRecords and faces\nThe fate."
+        self.title = "Dark Prince\nDark-World being.\nHas friends now."
     end
 
     -- Determines which character the soul comes from (higher number = higher priority)
@@ -45,12 +41,8 @@ function character:init()
     -- Current health (saved to the save file)
     if Game.chapter == 1 then
         self.health = 70
-    elseif Game.chapter == 2 then
-        self.health = 100
-    elseif Game.chapter == 3 then
-        self.health = 140
     else
-        self.health = 180
+        self.health = 100
     end
 
     -- Base stats (saved to the save file)
@@ -61,26 +53,12 @@ function character:init()
             defense = 2,
             magic = 7
         }
-    elseif Game.chapter == 2 then
+    else
         self.stats = {
             health = 100,
             attack = 10,
             defense = 2,
             magic = 9,
-        }
-    elseif Game.chapter == 3 then
-        self.stats = {
-            health = 140,
-            attack = 12,
-            defense = 2,
-            magic = 11,
-        }
-    else
-        self.stats = {
-            health = 180,
-            attack = 15,
-            defense = 2,
-            magic = 14,
         }
     end
     -- Max stats from level-ups
@@ -88,17 +66,9 @@ function character:init()
         self.max_stats = {
             health = 100
         }
-    elseif Game.chapter == 2 then
-        self.max_stats = {
-            health = 140
-        }
-    elseif Game.chapter == 3 then
-        self.max_stats = {
-            health = 180
-        }
     else
         self.max_stats = {
-            health = 210
+            health = 140
         }
     end
     
@@ -109,20 +79,10 @@ function character:init()
     self.weapon_icon = "ui/menu/equip/scarf"
 
     -- Equipment (saved to the save file)
-    if Game.chapter <= 2 then
-        self:setWeapon("red_scarf")
-        if Game.chapter == 2 then
-            self:setArmor(1, "amber_card")
-            self:setArmor(2, "white_ribbon")
-        end
-    elseif Game.chapter == 3 then
-        self:setWeapon("fiberscarf")
+    self:setWeapon("red_scarf")
+    if Game.chapter >= 2 then
         self:setArmor(1, "amber_card")
-        self:setArmor(2, "glowwrist")
-    elseif Game.chapter >= 4 then
-        self:setWeapon("flexscarf")
-        self:setArmor(1, "gingerguard")
-        self:setArmor(2, "glowwrist")
+        self:setArmor(2, "white_ribbon")
     end
 
     -- Default light world equipment item IDs (saves current equipment)
@@ -192,7 +152,7 @@ function character:onLevelUp(level)
 end
 
 function character:onPowerSelect(menu)
-    if MathUtils.random() <= 0.03 then
+    if Utils.random() <= 0.03 then
         menu.ralsei_dog = true
     else
         menu.ralsei_dog = false
@@ -214,14 +174,12 @@ function character:drawPowerStat(index, x, y, menu)
                 love.graphics.print("Dogness", x, y)
                 love.graphics.print("1", x+130, y)
             end
-        elseif Game.chapter == 2 then
+        else
             -- Chapter 2 Ralsei "Sweetness" stat (non-doggable)
             local icon = Assets.getTexture("ui/menu/icon/lollipop")
             Draw.draw(icon, x-26, y+6, 0, 2, 2)
             love.graphics.print("Sweetness", x, y)
             love.graphics.print("97", x+130, y)
-        else
-            return
         end
         return true
     elseif index == 2 then
@@ -230,8 +188,7 @@ function character:drawPowerStat(index, x, y, menu)
         love.graphics.print("Fluffiness", x, y, 0, 0.8, 1)
 
         Draw.draw(icon, x+130, y+6, 0, 2, 2)
-        -- Ralsei loses bonus fluffiness in Chapter 3
-        if Game.chapter == 2 then
+        if Game.chapter >= 2 then
             Draw.draw(icon, x+150, y+6, 0, 2, 2)
         end
         return true
@@ -239,10 +196,6 @@ function character:drawPowerStat(index, x, y, menu)
         local icon = Assets.getTexture("ui/menu/icon/fire")
         Draw.draw(icon, x-26, y+6, 0, 2, 2)
         love.graphics.print("Guts:", x, y)
-        -- Ralsei has Guts (Chapter 3 only...)
-        if Game.chapter == 3 then
-            Draw.draw(icon, x+90, y+6, 0, 2, 2)
-        end
         return true
     end
 end

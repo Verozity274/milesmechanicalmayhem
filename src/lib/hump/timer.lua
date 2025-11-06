@@ -132,14 +132,7 @@ end
 
 function Timer:script(f)
     local container = { handle = nil }
-    local thread = coroutine.create(f)
-    local co = function (...)
-        local ok, msg = coroutine.resume(thread, ...)
-        if not ok then
-            COROUTINE_TRACEBACK = debug.traceback(thread)
-            error(msg)
-        end
-    end
+    local co = coroutine.wrap(f)
     co(function(t)
         container.handle = self:after(t or 0, co)
         coroutine.yield()

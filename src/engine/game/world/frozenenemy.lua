@@ -7,7 +7,7 @@ function FrozenEnemy:init(actor, x, y, properties)
         actor = Registry.createActor(actor)
     end
     local w, h = actor:getSize()
-    super.init(self, x, y, {w, h}, properties)
+    super.init(self, x, y, w, h, properties)
 
     properties = properties or {}
 
@@ -35,7 +35,7 @@ end
 
 function FrozenEnemy:getDebugInfo()
     local info = super.getDebugInfo(self)
-    table.insert(info, "Actor: " .. self.actor:getName())
+    table.insert(info, "Actor: " .. self.actor)
     return info
 end
 

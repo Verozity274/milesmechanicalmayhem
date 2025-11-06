@@ -1,7 +1,7 @@
 --- The `World` Object manages everything relating to the overworld in Kristal. \
 --- A globally available instance of `World` is stored in [`Game.world`](lua://Game.world).
 ---
----@class World : Object, StateManagedClass
+---@class World : Object
 ---
 ---@field state             string                          The current state that this `World` is in - should never be set manually, see [`World:setState()`](lua://World.setState) instead
 ---@field state_manager     StateManager                    An object that manages the state of this `World`
@@ -17,7 +17,6 @@
 ---
 ---@field battle_borders    table                           *(unused? See [`Map.battle_borders`](lua://Map.battle_borders))*
 ---
----@field encountering_enemy    boolean
 ---@field transition_fade   number                          *(unused?)*
 ---
 ---@field in_battle         boolean                         Whether the player is currently in a world battle set through [`World:setBattle()](lua://World.setBattle) (affects the visibility of world battle content)
@@ -37,8 +36,7 @@
 ---
 ---@field can_open_menu     boolean                         Whether the player can open their menu
 ---
----@field menu              LightMenu|DarkMenu|Component?   The Menu object of the menu, if it is open
----@field current_selecting number
+---@field menu              LightMenu|DarkMenu?             The Menu object of the menu, if it is open
 ---
 ---@field calls             table<[string, string]>   A list of calls available on the cell phone in the Light World CELL menu
 ---
@@ -216,9 +214,9 @@ function World:setState(state)
 end
 
 --- Opens the main overworld menu
----@param menu?     Object  An optional menu instance to open
+---@param menu?     LightMenu|DarkMenu  An optional menu instance to open
 ---@param layer?    number  The layer to create the menu on (defaults to `WORLD_LAYERS["ui"]` or `600`)
----@return Object?
+---@return (DarkMenu|LightMenu)?
 function World:openMenu(menu, layer)
     if self:hasCutscene() then return end
     if self:inBattle() then return end
@@ -244,7 +242,7 @@ function World:openMenu(menu, layer)
         elseif self.menu:includes(Component) then
             -- Sigh... traverse the children to find the menu component
             for _,child in ipairs(self.menu:getComponents()) do
-                if child:includes(AbstractMenuComponent) then ---@cast child AbstractMenuComponent
+                if child:includes(AbstractMenuComponent) then
                     child.close_callback = function()
                         self:afterMenuClosed()
                     end
@@ -367,10 +365,8 @@ function World:onKeyPressed(key)
             if Input.shift() then
                 save_pos = {self.player.x, self.player.y}
             end
-            if Game:getConfig("smallSaveMenu") then
+            if Game:isLight() or Game:getConfig("smallSaveMenu") then
                 self:openMenu(SimpleSaveMenu(Game.save_id, save_pos))
-            elseif Game:isLight() then
-                self:openMenu(LightSaveMenu(save_pos))
             else
                 self:openMenu(SaveMenu(save_pos))
             end
@@ -382,9 +378,6 @@ function World:onKeyPressed(key)
         end
         if key == "b" then
             Game.world:hurtParty(math.huge)
-        end
-        if key == "k" then
-            Game:setTension(Game:getMaxTension() * 2, true)
         end
         if key == "n" then
             NOCLIP = not NOCLIP
@@ -461,7 +454,6 @@ end
 
 --- Starts a cutscene in the world
 ---@overload fun(self: World, id: string, ...)
----@overload fun(self: World, func: WorldCutsceneFunc, ...)
 ---@param group string  The name of the group the cutscene is a part of
 ---@param id    string  The id of the cutscene 
 ---@param ...   any     Additional arguments that will be passed to the cutscene function
@@ -498,8 +490,8 @@ function World:stopCutscene()
 end
 
 --- Shows a textbox with the input `text`
----@param text      string|string[]|string[][]
----@param after?    WorldCutsceneFunc        A callback to run when the textbox is closed, receiving the cutscene instance used to display the text
+---@param text      string|string[]
+---@param after?    fun(cutscene: WorldCutscene)    A callback to run when the textbox is closed, receiving the cutscene instance used to display the text
 function World:showText(text, after)
     if type(text) ~= "table" then
         text = {text}
@@ -599,7 +591,7 @@ end
 
 --- Removes a follower
 ---@param chara string|Follower The `Follower` or the follower's actor id to remove
----@return Follower? follower The follower that was removed
+---@return Follower follower The follower that was removed
 function World:removeFollower(chara)
     local follower_arg = isClass(chara) and chara:includes(Follower)
     for i,follower in ipairs(self.followers) do
@@ -741,10 +733,9 @@ function World:spawnNPC(actor, x, y, properties)
 end
 
 --- Spawns an object to the world
----@generic T : Object
----@param obj T                 The object to add to the world
+---@param obj Object            The object to add to the world
 ---@param layer? string|number  The layer to place the object on
----@return T
+---@return Object
 function World:spawnObject(obj, layer)
     obj.layer = self:parseLayer(layer)
     self:addChild(obj)

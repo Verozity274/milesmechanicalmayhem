@@ -7,8 +7,8 @@
 ---@overload fun(...) : Silhouette
 local Silhouette, super = Class(Event)
 
-function Silhouette:init(x, y, shape)
-    super.init(self, x, y, shape)
+function Silhouette:init(x, y, w, h)
+    super.init(self, x, y, w, h)
 
     self.solid = false
 end

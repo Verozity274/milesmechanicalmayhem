@@ -1,23 +1,4 @@
---- A Fader is an Object that can be used to fade the screen in and out, usually using the instance stored at [`Game.fader`](lua://Game.fader) \
---- Modifying the fader's `width`, `height`, `x`, and `y` values can make it only affect a portion of the screen
 ---@class Fader : Object
----
----@field width number
----@field height number
----
----@field fade_color table
----@field alpha number
----
----@field state string
----@field callback_function fun()
----
----@field default_speed number
----@field speed number
----
----@field music Music?
----@field debug_select boolean
----@field blocky boolean
----
 ---@overload fun(...) : Fader
 local Fader, super = Class(Object)
 
@@ -86,15 +67,6 @@ function Fader:parseMusicFade(to, options)
     end
 end
 
---- Starts a transitional fade that runs callbacks at certain points in the fade progress
----@param middle_callback?   fun()   A function that runs at the instant the fade out finishes, before fading back in
----@param end_callback?      fun()   A function that runs when the fader has fully faded back in
----@param options?           table   A table defining additional properties to control the fade.
----| "speed"    # The speed to fade out at, in seconds. (Defaults to `0.25`)
----| "color"    # The color that should be faded to (Defaults to `COLORS.black`)
----| "alpha"    # The alpha to start at (Defaults to `0`)
----| "blocky"   # Whether to do a rough, 'blocky' fade. (Defaults to `false`)
----| "music"    # The speed to fade the music at, or whether to fade it at all (Defaults to fade speed)
 function Fader:transition(middle_callback, end_callback, options)
     options = options or {}
     self:fadeOut(function()
@@ -174,14 +146,10 @@ function Fader:update()
             end
         end
     end
-    if self.state == "NONE" then
-        self:setColor(0, 0, 0)
-        self.fade_color = self.color
-    end
 end
 
 function Fader:draw()
-    local color = TableUtils.copy(self.fade_color)
+    local color = Utils.copy(self.fade_color)
     local alpha = self.alpha * (color[4] or 1)
 
     if self.blocky then

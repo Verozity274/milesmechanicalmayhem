@@ -39,7 +39,6 @@ function actor:init()
     self.animations = {
         -- Cutscene animations
         ["sit"] = {"sit", 0.25, true},
-        ["slide"] = {"slide", 0.25, true},
     }
 
     -- Tables of sprites to change into in mirrors
@@ -58,8 +57,6 @@ function actor:init()
         ["fallen"] = {-8, 16},
 
         ["sit"] = {-4, -8},
-        
-        ["slide"] = {0, 0},
 
         ["ghostwalk_lf"] = {-4, 3},
         ["ghostwalk_lu"] = {-4, 3},

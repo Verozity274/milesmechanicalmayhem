@@ -30,7 +30,6 @@
 ---@field events table<string, Event|Object>
 ---@field controllers table<string, Event|Object>
 ---@field shops table<string, Shop>
----@field borders table<string, Border>
 ---
 local Registry = {}
 local self = Registry
@@ -61,8 +60,7 @@ Registry.paths = {
     ["maps"]             = "world/maps",
     ["events"]           = "world/events",
     ["controllers"]      = "world/controllers",
-    ["shops"]            = "shops",
-    ["borders"]          = "borders",
+    ["shops"]            = "shops"
 }
 
 ---@param preload boolean?
@@ -99,7 +97,6 @@ function Registry.initialize(preload)
         Registry.initEvents()
         Registry.initControllers()
         Registry.initShops()
-        Registry.initBorders()
 
         Kristal.callEvent(KRISTAL_EVENT.onRegistered)
     end
@@ -467,24 +464,6 @@ function Registry.createShop(id, ...)
     end
 end
 
----@generic T
----@param id Border.`T`
----@param ... any
----@return T|Border
-function Registry.createBorder(id, ...)
-    if self.borders[id] then
-        return self.borders[id](...)
-    else
-        local texture = Assets.getTexture("borders/"..id)
-        if texture then
-            return ImageBorder(texture,id)
-        end
-        local border = Border()
-        border.id = id
-        return border
-    end
-end
-
 -- Register Functions --
 
 ---@param id string
@@ -623,12 +602,6 @@ end
 ---@param class Shop
 function Registry.registerShop(id, class)
     self.shops[id] = class
-end
-
----@param id string
----@param border Border
-function Registry.registerBorder(id, border)
-    self.borders[id] = border
 end
 
 -- Internal Functions --
@@ -901,18 +874,6 @@ function Registry.initShops()
     Kristal.callEvent(KRISTAL_EVENT.onRegisterShops)
 end
 
-function Registry.initBorders()
-    self.borders = {}
-
-    for _,path,border in self.iterScripts(Registry.paths["borders"]) do
-        assert(border ~= nil, '"borders/'..path..'.lua" does not return value')
-        border.id = border.id or path
-        self.registerBorder(border.id, border)
-    end
-
-    Kristal.callEvent(KRISTAL_EVENT.onRegisterBorders)
-end
-
 ---@param base_path string
 ---@param exclude_folder boolean?
 ---@return fun() : string?, string?, ...
@@ -920,7 +881,7 @@ function Registry.iterScripts(base_path, exclude_folder)
     local result = {}
 
     CLASS_NAME_GETTER = function(k)
-        for _,v in ipairs(Utils.reverse(result)) do
+        for _,v in ipairs(result) do
             if v.id == k then
                 return v.out[1]
             end
@@ -934,12 +895,7 @@ function Registry.iterScripts(base_path, exclude_folder)
     local addChunk, parse
 
     addChunk = function(path, chunk, file, full_path)
-        local success,a,b,c,d,e,f = xpcall(chunk, function (msg)
-            if type(msg) == "table" then
-                return msg
-            end
-            return ({msg = debug.traceback(msg)})
-        end)
+        local success,a,b,c,d,e,f = pcall(chunk)
         if not success then
             if type(a) == "table" and a.included then
                 table.insert(queued_parse, {path, chunk, file, full_path})
@@ -954,9 +910,6 @@ function Registry.iterScripts(base_path, exclude_folder)
                 result_path = split_path[#split_path]
             end
             local id = type(a) == "table" and a.id or result_path
-            if type(a) == "table" and a.__hookscript_class then
-                return true
-            end
             table.insert(result, {out = {a,b,c,d,e,f}, path = result_path, id = id, full_path = full_path})
             return true
         end

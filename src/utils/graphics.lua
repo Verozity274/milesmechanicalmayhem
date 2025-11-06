@@ -3,23 +3,15 @@ local graphics = love.graphics
 
 local old_replaceTransform = love.graphics.replaceTransform
 
----@alias GraphicsStackItem love.Transform|table
----@type GraphicsStackItem[]
 local transformStack = {}
 
 local transform = love.math.newTransform()
 
-local old_reset = love.graphics.reset
-
 function graphics.reset()
-    old_reset()
-    love.graphics.setDefaultFilter("nearest", "nearest")
-    love.graphics.setLineStyle("rough")
-
     transformStack = {}
     love.graphics.origin()
 
-    Draw._clearScissorStack()
+    Draw._scissor_stack = {}
     love.graphics.setScissor()
 end
 
@@ -92,38 +84,12 @@ function graphics.origin()
 end
 
 function graphics.pop()
-    local item = table.remove(transformStack, 1)
-    if type(item) == "userdata" then
-        transform = item
-    else
-        transform = item.transform
-        love.graphics.setBackgroundColor(item.backgroundColor)
-        love.graphics.setBlendMode(unpack(item.blendMode))
-        love.graphics.setCanvas(item.canvas)
-        love.graphics.setFont(item.font)
-        love.graphics.setColorMask(unpack(item.colorMask))
-        love.graphics.setShader(item.shader)
-        Draw.popScissor()
-    end
+    transform = table.remove(transformStack, 1)
     old_replaceTransform(transform)
 end
 
-function graphics.push(stack)
-    ---@type GraphicsStackItem
-    local item = transform
-    if stack == "all" then
-        item = {
-            transform = transform,
-            backgroundColor = { love.graphics.getBackgroundColor() },
-            blendMode = { love.graphics.getBlendMode() },
-            canvas = love.graphics.getCanvas(),
-            font = love.graphics.getFont(),
-            colorMask = { love.graphics.getColorMask() },
-            shader = love.graphics.getShader()
-        }
-        Draw.pushScissor()
-    end
-    table.insert(transformStack, 1, item)
+function graphics.push()
+    table.insert(transformStack, 1, transform)
     transform = transform:clone()
 end
 

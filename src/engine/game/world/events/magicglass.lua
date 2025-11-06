@@ -14,8 +14,8 @@
 ---@overload fun(...) : MagicGlass
 local MagicGlass, super = Class(Event)
 
-function MagicGlass:init(x, y, shape)
-    super.init(self, x, y, shape)
+function MagicGlass:init(x, y, w, h)
+    super.init(self, x, y, w, h)
 
     self.texture = Assets.getTexture("world/events/magical_glass")
 

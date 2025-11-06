@@ -62,9 +62,6 @@ function MainMenuModList:onEnter(old_state)
     elseif #self.list.mods > 0 then
         self.list.active = true
         self.list.visible = true
-
-        self.menu.selected_mod = self:getSelectedMod()
-        self.menu.selected_mod_button = self:getSelectedButton()
     end
 end
 
@@ -75,7 +72,7 @@ function MainMenuModList:onLeave(new_state)
     end
 
     self.active = false
-
+    
     self.menu.heart:setColor(Kristal.getSoulColor())
     self.menu.heart_outline.visible = false
 end
@@ -105,7 +102,7 @@ function MainMenuModList:onKeyPressed(key, is_repeat)
 
             elseif mod then
                 Assets.stopAndPlaySound("ui_select")
-                if (mod["useSaves"] == "has_saves" and (#love.filesystem.getDirectoryItems("saves/" .. mod.id) > 0))
+                if (mod["useSaves"] == "has_saves" and (#love.filesystem.getDirectoryItems( "saves/"..mod.id ) > 0))
                 or (mod["useSaves"] ~= "has_saves" and mod["useSaves"])
                 or (mod["useSaves"] == nil and not mod["encounter"]) then
                     self.menu:setState("FILESELECT")
@@ -120,9 +117,9 @@ function MainMenuModList:onKeyPressed(key, is_repeat)
             if mod then
                 Assets.stopAndPlaySound("ui_select")
 
-                local is_favorited = TableUtils.contains(Kristal.Config["favorites"], mod.id)
+                local is_favorited = Utils.containsValue(Kristal.Config["favorites"], mod.id)
                 if is_favorited then
-                    TableUtils.removeValue(Kristal.Config["favorites"], mod.id)
+                    Utils.removeFromTable(Kristal.Config["favorites"], mod.id)
                 else
                     table.insert(Kristal.Config["favorites"], mod.id)
                 end
@@ -334,13 +331,13 @@ function MainMenuModList:buildModListFavorited()
     
     -- Sort them by favorites or filepath
     table.sort(self.mods, function(a, b)
-        local a_fav = TableUtils.contains(Kristal.Config["favorites"], a.id)
-        local b_fav = TableUtils.contains(Kristal.Config["favorites"], b.id)
+        local a_fav = Utils.containsValue(Kristal.Config["favorites"], a.id)
+        local b_fav = Utils.containsValue(Kristal.Config["favorites"], b.id)
         return (a_fav and not b_fav) or (a_fav == b_fav and a.path:lower() < b.path:lower())
     end)
     
     -- Add mods to the list
-    for _, mod in ipairs(self.mods) do
+    for _,mod in ipairs(self.mods) do
         -- Create the mod button
         local button = ModButton(mod.name or mod.id, 424, 62, mod)
         self.list:addMod(button)
@@ -350,11 +347,7 @@ function MainMenuModList:buildModListFavorited()
             local chunk = love.filesystem.load(mod.preview_script_path)
             local success, result = pcall(chunk, mod.path)
             if success then
-                self.scripts[mod.id] = result
                 button.preview_script = result
-
-                result.fade = 0
-                result.selected = false
 
                 if result.init then
                     result:init(mod, button)
@@ -439,8 +432,8 @@ function MainMenuModList:buildModList()
 
     -- Sort them by favorites or filepath
     table.sort(self.mods, function(a, b)
-        local a_fav = TableUtils.contains(Kristal.Config["favorites"], a.id)
-        local b_fav = TableUtils.contains(Kristal.Config["favorites"], b.id)
+        local a_fav = Utils.containsValue(Kristal.Config["favorites"], a.id)
+        local b_fav = Utils.containsValue(Kristal.Config["favorites"], b.id)
         return (a_fav and not b_fav) or (a_fav == b_fav and a.path:lower() < b.path:lower())
     end)
 
@@ -460,9 +453,6 @@ function MainMenuModList:buildModList()
             if success then
                 self.scripts[mod.id] = result
                 button.preview_script = result
-
-                result.fade = 0
-                result.selected = false
 
                 if result.init then
                     result:init(mod, button)

@@ -2,7 +2,6 @@
 ---@overload fun(...) : Textbox
 local Textbox, super = Class(Object)
 
----@enum (key) Textbox.REACTION_X
 Textbox.REACTION_X = {
         ["left"] = 70  -38,
      ["leftmid"] = 160 -38,
@@ -11,8 +10,6 @@ Textbox.REACTION_X = {
     ["rightmid"] = 360 -38,
        ["right"] = 400 -38,
 }
-
----@enum (key) Textbox.REACTION_Y
 Textbox.REACTION_Y = {
           ["top"] = -10 -4,
           ["mid"] =  30 -4,
@@ -229,8 +226,6 @@ function Textbox:resetReactions()
     self.reaction_instances = {}
 end
 
----@param x number
----@param y number
 function Textbox:addReaction(id, text, x, y, face, actor)
     x, y = x or 0, y or 0
     if type(x) == "string" then
@@ -259,20 +254,11 @@ function Textbox:addFunction(id, func)
     self.text:addFunction(id, func)
 end
 
----@param text string|string[]
 function Textbox:setText(text, callback)
-    -- Clear reactions
-    for _, reaction in ipairs(self.reaction_instances) do
+    for _,reaction in ipairs(self.reaction_instances) do
         reaction:remove()
     end
     self.reaction_instances = {}
-
-    -- Clear minifaces
-    for _, miniface in ipairs(self.minifaces) do
-        miniface:remove()
-    end
-    self.minifaces = {}
-
     self.text.font = self.font
     self.text.font_size = self.font_size
     if self.actor then
@@ -280,7 +266,7 @@ function Textbox:setText(text, callback)
             if type(text) ~= "table" then
                 text = {text}
             else
-                text = TableUtils.copy(text)
+                text = Utils.copy(text)
             end
             for i,line in ipairs(text) do
                 text[i] = "[voice:"..self.actor:getVoice().."]"..line
@@ -290,7 +276,7 @@ function Textbox:setText(text, callback)
             if type(text) ~= "table" then
                 text = {text}
             else
-                text = TableUtils.copy(text)
+                text = Utils.copy(text)
             end
             for i,line in ipairs(text) do
                 text[i] = "[font:"..self.actor:getFont().."]"..line

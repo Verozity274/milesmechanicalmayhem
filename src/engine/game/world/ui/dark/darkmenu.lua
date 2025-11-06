@@ -67,9 +67,7 @@ function DarkMenu:getButtonSpacing()
 end
 
 function DarkMenu:addButton(button, index)
-    index = index or #self.buttons + 1
-    table.insert(self.buttons, index, button)
-    return index
+    table.insert(self.buttons, index or #self.buttons + 1, button)
 end
 
 function DarkMenu:addButtons()
@@ -83,7 +81,7 @@ function DarkMenu:addButtons()
             self.box = DarkItemMenu()
             self.box.layer = 1
             self:addChild(self.box)
-
+    
             self.ui_select:stop()
             self.ui_select:play()
         end
@@ -99,7 +97,7 @@ function DarkMenu:addButtons()
             self.box = DarkEquipMenu()
             self.box.layer = 1
             self:addChild(self.box)
-
+    
             self.ui_select:stop()
             self.ui_select:play()
         end
@@ -115,7 +113,7 @@ function DarkMenu:addButtons()
             self.box = DarkPowerMenu()
             self.box.layer = 1
             self:addChild(self.box)
-
+    
             self.ui_select:stop()
             self.ui_select:play()
         end
@@ -131,7 +129,7 @@ function DarkMenu:addButtons()
             self.box = DarkConfigMenu()
             self.box.layer = -1
             self:addChild(self.box)
-
+    
             self.ui_select:stop()
             self.ui_select:play()
         end

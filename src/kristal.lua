@@ -1,9 +1,6 @@
----@class Kristal
 local Kristal = {}
 
-if HOTSWAPPING then
-    Utils.copyInto(Kristal, _G.Kristal)
-else
+if not HOTSWAPPING then
     Kristal.Config = {}
     Kristal.Mods = require("src.engine.mods")
     Kristal.Overlay = require("src.engine.overlay")
@@ -137,8 +134,6 @@ function love.load(args)
     Kristal.ChapterConfigs = {}
     Kristal.ChapterConfigs[1] = JSON.decode(love.filesystem.read("configs/chapter1.json"))
     Kristal.ChapterConfigs[2] = JSON.decode(love.filesystem.read("configs/chapter2.json"))
-    Kristal.ChapterConfigs[3] = JSON.decode(love.filesystem.read("configs/chapter3.json"))
-    Kristal.ChapterConfigs[4] = JSON.decode(love.filesystem.read("configs/chapter4.json"))
 
     -- register gamestate calls
     Gamestate.registerEvents()
@@ -156,9 +151,6 @@ function love.load(args)
     PERFORMANCE_TEST = nil
     ---@type string|nil
     PERFORMANCE_TEST_STAGE = nil
-
-    SCREENSHOT_DISPLAY = 1
-    TAKING_SCREENSHOT = false
 
     -- setup hooks
     Utils.hook(love, "update", function (orig, ...)
@@ -204,26 +196,16 @@ function love.load(args)
             end
 
             if border then
-                -- ugly hack for a ternary with falsy value in the middle
-                local border_texture = (isClass(border) and {} or {Assets.getTexture("borders/" ..border)})[1]
+                local border_texture = Assets.getTexture("borders/" .. border)
 
                 love.graphics.scale(Kristal.getGameScale())
                 Draw.setColor(1, 1, 1, dynamic and BORDER_ALPHA or 1)
-                love.graphics.push("all")
-                love.graphics.translate(
-                    ((love.graphics.getWidth()/Kristal.getGameScale())) / 2 + (((love.graphics.getHeight()/Kristal.getGameScale()) / -2) * (16/9)),
-                    ((love.graphics.getHeight()/Kristal.getGameScale()) / 2) + ((love.graphics.getHeight()/Kristal.getGameScale()) / -2)
-                )
                 if border_texture then
                     Draw.draw(border_texture, 0, 0, 0, BORDER_SCALE)
                 end
                 if dynamic then
-                    if isClass(border) then
-                        border:draw()
-                    end
-                    Kristal.callEvent(KRISTAL_EVENT.onBorderDraw, border.id, border_texture)
+                    Kristal.callEvent(KRISTAL_EVENT.onBorderDraw, border, border_texture)
                 end
-                love.graphics.pop()
                 Draw.setColor(1, 1, 1, 1)
                 love.graphics.reset()
             end
@@ -259,17 +241,6 @@ function love.load(args)
             PERFORMANCE_TEST_STAGE = nil
             PERFORMANCE_TEST = nil
         end
-
-        local screenshot_size = Utils.lerp(20, 0, SCREENSHOT_DISPLAY)
-        if screenshot_size > 0 and not TAKING_SCREENSHOT then
-            local w = love.graphics.getWidth() / Kristal.getGameScale()
-            local h = love.graphics.getHeight() / Kristal.getGameScale()
-            love.graphics.rectangle("fill", 0, 0, screenshot_size, h)
-            love.graphics.rectangle("fill", w - screenshot_size, 0, screenshot_size, h)
-            love.graphics.rectangle("fill", 0, 0, w, screenshot_size)
-            love.graphics.rectangle("fill", 0, h - screenshot_size, w, screenshot_size)
-        end
-        TAKING_SCREENSHOT = false
     end)
 
     -- start load thread
@@ -286,13 +257,6 @@ function love.load(args)
     if HTTPS_AVAILABLE then
         Kristal.HTTPS.thread = love.thread.newThread("src/engine/httpsthread.lua")
         Kristal.HTTPS.thread:start()
-    end
-
-    -- TARGET_MOD being already set -> mod developer has
-    -- a preference for auto mod start. We particularly wouldn't
-    -- want the user to overwrite this since it can break some mods
-    if not TARGET_MOD and Kristal.Args["auto-mod-start"] then
-        AUTO_MOD_START = true
     end
 
     -- TARGET_MOD being already set -> is defined by the mod developer
@@ -365,8 +329,6 @@ function love.update(dt)
     Assets.update()
     TextInput.update()
 
-    SCREENSHOT_DISPLAY = Utils.approach(SCREENSHOT_DISPLAY, 1, 4 * dt)
-
     if Kristal.Loader.waiting > 0 then
         while Kristal.Loader.out_channel:getCount() > 0 do
             local msg = Kristal.Loader.out_channel:pop()
@@ -418,7 +380,6 @@ function love.mousepressed(win_x, win_y, button, istouch, presses)
     if Kristal.DebugSystem then
         Kristal.DebugSystem:onMousePressed(x, y, button, istouch, presses)
     end
-    Input.onMousePressed(x, y, button, istouch, presses)
     Kristal.callEvent(KRISTAL_EVENT.onMousePressed, x, y, button, istouch, presses)
 end
 
@@ -433,7 +394,6 @@ function love.mousereleased(x, y, button, istouch, presses)
     if Kristal.DebugSystem then
         Kristal.DebugSystem:onMouseReleased(x, y, button, istouch, presses)
     end
-    Input.onMouseReleased(x, y, button, istouch, presses)
     Kristal.callEvent(KRISTAL_EVENT.onMouseReleased, x, y, button, istouch, presses)
 end
 
@@ -511,13 +471,6 @@ function Kristal.onKeyPressed(key, is_repeat)
         elseif key == "f8" then
             print("Hotswapping files...\nNOTE: Might be unstable. If anything goes wrong, it's not our fault :P")
             Hotswapper.scan()
-        elseif key == "f9" then
-            love.filesystem.createDirectory("screenshots")
-            love.graphics.captureScreenshot("screenshots/" .. os.time() .. "-" .. RUNTIME .. ".png")
-            love.system.vibrate(0.1)
-            Assets.playSound("camera_flash")
-            SCREENSHOT_DISPLAY = 0
-            TAKING_SCREENSHOT = true
         elseif key == "r" and Input.ctrl() and not console_open then
             if Kristal.getModOption("hardReset") or Input.alt() and Input.shift() then
                 love.event.quit("restart")
@@ -575,8 +528,6 @@ end
 ---@param  msg string|table     The error message.
 ---@return function|nil handler The error handler, called every frame instead of the main loop.
 function Kristal.errorHandler(msg)
-    love.graphics.setShader()
-
     local copy_color = { 1, 1, 1, 1 }
     local anim_index = 1
     local starwalker_error = (love.math.random(100) <= 5) -- 5% chance for starwalker
@@ -673,19 +624,12 @@ function Kristal.errorHandler(msg)
 
     Draw.setColor(1, 1, 1, 1)
 
-    local coroutine_crash
     if not trace then
         trace = ""
         if not critical then
             trace = debug.traceback("", 2)
         end
-        if COROUTINE_TRACEBACK then
-            trace = COROUTINE_TRACEBACK .. "\n" .. trace
-            coroutine_crash = true
-        end
     end
-
-    COROUTINE_TRACEBACK = nil
 
     love.graphics.origin()
 
@@ -707,16 +651,9 @@ function Kristal.errorHandler(msg)
         if Utils.tableLength(Mod.libs) > 0 then
             lib_string = "Libraries:"
             for _, lib in Kristal.iterLibraries() do
-                -- Very rare edge case where `lib` ends up being `nil`, we'll add an
-                -- "Unknown Library" string here if this ever happens
-                local line
-                if not (lib and lib.info) then
-                    line = "Unknown Library"
-                else
-                    line = (lib.info.id or "") .. " " .. (lib.info.version or "v?.?.?")
-                end
+                local line = (lib.info.id or "") .. " " .. (lib.info.version or "v?.?.?")
                 lib_string = lib_string .. "\n" .. line
-                w = math.max(w, smaller_font:getWidth(line))
+                w = math.max(w, #line * 7)
                 h = h + 16
             end
         end
@@ -748,19 +685,11 @@ function Kristal.errorHandler(msg)
             ypos = ypos + (32 * #lines)
             love.graphics.setFont(font)
 
-            local shown_coroutine = false
             for l in trace:gmatch("(.-)\n") do
                 if not l:match("boot.lua") then
                     if l:match("stack traceback:") then
                         love.graphics.setFont(font)
-                        if coroutine_crash and not shown_coroutine then
-                            love.graphics.printf("Coroutine Traceback:", pos, ypos, warp)
-                            shown_coroutine = true
-                        elseif coroutine_crash then
-                            love.graphics.printf("Main Traceback:", pos, ypos, warp)
-                        else
-                            love.graphics.printf("Traceback:", pos, ypos, warp)
-                        end
+                        love.graphics.printf("Traceback:", pos, ypos, warp)
                         ypos = ypos + 32
                     else
                         if ypos >= window_height - 40 - 32 then
@@ -860,8 +789,6 @@ function Kristal.errorHandler(msg)
                 else
                     return "reload"
                 end
-            elseif e == "keypressed" and a == "r" and love.keyboard.isDown("lctrl", "rctrl") and love.keyboard.isDown("lalt", "ralt") and love.keyboard.isDown("lshift", "rshift") then
-                return "restart"
             elseif e == "keypressed" and a == "c" and love.keyboard.isDown("lctrl", "rctrl") and not critical then
                 copyToClipboard()
             elseif e == "touchpressed" then
@@ -901,7 +828,7 @@ function Kristal.errorHandler(msg)
         local x, y = love.mouse:getPosition()
 
         show_libraries = false
-        if 20 < x and x < 20 + smaller_font:getWidth(mod_string) and 10 < y and y < 26 then
+        if 20 < x and x < 20 + #mod_string * 7 and 10 < y and y < 26 then
             show_libraries = true
         end
 
@@ -1041,12 +968,6 @@ function Kristal.returnToMenu()
     -- Clear the mod
     Kristal.clearModState()
 
-    -- Quit the game if the menu is disabled
-    if AUTO_MOD_START and TARGET_MOD then
-        love.event.quit(0)
-        return
-    end
-
     -- Reload mods and return to memu
     Kristal.loadAssets("", "mods", "", function ()
         Kristal.setDesiredWindowTitleAndIcon()
@@ -1156,13 +1077,12 @@ end
 ---@param save_id?   number   The id of the save to load the mod from. (1-3)
 ---@param save_name? string   The name to use for the save file.
 ---@param after?     function The function to call after assets have been loaded.
----@return boolean   success  Whether the mod was loaded successfully.
 function Kristal.loadMod(id, save_id, save_name, after)
     -- Get the mod data (loaded from mod.json)
     local mod = Kristal.Mods.getAndLoadMod(id)
 
     -- No mod found; nothing to load
-    if not mod then return false end
+    if not mod then return end
 
     -- Create the Mod table, which is a global table that
     -- can contain a mod's custom variables and functions
@@ -1221,8 +1141,6 @@ function Kristal.loadMod(id, save_id, save_name, after)
             Gamestate.switch(Kristal.States["Game"], save_id, save_name)
         end
     end)
-
-    return true
 end
 
 --- Loads assets from a mod and its libraries. Called internally by `Kristal.loadMod`.
@@ -1403,7 +1321,7 @@ function Kristal.getRelativeBorderSize()
     return 0, 0
 end
 
----@return Border|nil border The currently displayed border, or `nil` if borders are disabled.
+---@return string|nil border The currently displayed border, or `nil` if borders are disabled.
 function Kristal.getBorder()
     if not REGISTRY_LOADED then
         return nil
@@ -1422,12 +1340,12 @@ function Kristal.getBorder()
     return nil
 end
 
----@return Border|nil border The currently displayed border if dynamic borders are enabled.
+---@return string|nil border The currently displayed border if dynamic borders are enabled.
 function Kristal.processDynamicBorder()
     if Kristal.getState() == Game then
         return Game:getBorder()
     elseif Kristal.getState() == MainMenu then
-        return ImageBorder("castle")
+        return "simple"
     end
 end
 

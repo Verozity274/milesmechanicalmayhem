@@ -57,14 +57,6 @@ function HealItem:getBattleHealAmount(id)
     return self.battle_heal_amounts[id] or self.battle_heal_amount or self:getHealAmount(id)
 end
 
---- Applies `Battle:applyHealBonuses()` to the battle heal amount. Can be overriden to disable or change behaviour.
----@param id string             The id of the character to get the HP amount for
----@param healer PartyMember    The party member performing the heal action
-function HealItem:getBattleHealAmountModified(id, healer)
-    local amount = self:getBattleHealAmount(id)
-    return Game.battle:applyHealBonuses(amount, healer)
-end
-
 --- Modified to perform healing based on the set healing amounts
 ---@param target PartyMember|PartyMember[]
 ---@return boolean
@@ -93,22 +85,22 @@ end
 function HealItem:onBattleUse(user, target)
     if self.target == "ally" then
         -- Heal single party member
-        local amount = self:getBattleHealAmountModified(target.chara.id, user.chara)
+        local amount = self:getBattleHealAmount(target.chara.id)
         target:heal(amount)
     elseif self.target == "party" then
         -- Heal all party members
         for _,battler in ipairs(target) do
-            local amount = self:getBattleHealAmountModified(battler.chara.id, user.chara)
+            local amount = self:getBattleHealAmount(battler.chara.id)
             battler:heal(amount)
         end
     elseif self.target == "enemy" then
         -- Heal single enemy (why)
-        local amount = self:getBattleHealAmountModified(target.id, user.chara)
+        local amount = self:getBattleHealAmount(target.id)
         target:heal(amount)
     elseif self.target == "enemies" then
         -- Heal all enemies (why????)
         for _,enemy in ipairs(target) do
-            local amount = self:getBattleHealAmountModified(enemy.id, user.chara)
+            local amount = self:getBattleHealAmount(enemy.id)
             enemy:heal(amount)
         end
     else

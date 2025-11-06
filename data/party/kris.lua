@@ -16,12 +16,8 @@ function character:init()
     -- Default title / class (saved to the save file)
     if Game.chapter == 1 then
         self.title = "Leader\nCommands the party\nwith various ACTs."
-    elseif Game.chapter == 2 then
-        self.title = "Tactician\nCommands the party\nby ACTs. Sometimes."
-    elseif Game.chapter == 3 then
-        self.title = "Tactician\nCommands the party\nby ACTs."
     else
-        self.title = "Dark Hero\nCarries out fate\nwith the blade."
+        self.title = "Tactician\nCommands the party\nby ACTs. Sometimes."
     end
 
     -- Determines which character the soul comes from (higher number = higher priority)
@@ -41,12 +37,8 @@ function character:init()
     -- Current health (saved to the save file)
     if Game.chapter == 1 then
         self.health = 90
-    elseif Game.chapter == 2 then
-        self.health = 120
-    elseif Game.chapter == 3 then
-        self.health = 160
     else
-        self.health = 200
+        self.health = 120
     end
 
     -- Base stats (saved to the save file)
@@ -57,45 +49,22 @@ function character:init()
             defense = 2,
             magic = 0
         }
-    elseif Game.chapter == 2 then
+    else
         self.stats = {
             health = 120,
             attack = 12,
             defense = 2,
             magic = 0
         }
-    elseif Game.chapter == 3 then
-        self.stats = {
-            health = 160,
-            attack = 14,
-            defense = 2,
-            magic = 0
-        }
-    else
-        self.stats = {
-            health = 200,
-            attack = 17,
-            defense = 2,
-            magic = 0
-        }
-
     end
     -- Max stats from level-ups
     if Game.chapter == 1 then
         self.max_stats = {
             health = 120
         }
-    elseif Game.chapter == 2 then
-        self.max_stats = {
-            health = 160
-        }
-    elseif Game.chapter == 3 then
-        self.max_stats = {
-            health = 200
-        }
     else
         self.max_stats = {
-            health = 240
+            health = 160
         }
     end
     
@@ -106,30 +75,14 @@ function character:init()
     self.weapon_icon = "ui/menu/equip/sword"
 
     -- Equipment (saved to the save file)
-    if Game.chapter <= 2 then
-        self:setWeapon("wood_blade")
-        if Game.chapter == 2 then
-            self:setArmor(1, "amber_card")
-            self:setArmor(2, "amber_card")
-        end
-    elseif Game.chapter == 3 then
-        self:setWeapon("mechasaber")
+    self:setWeapon("wood_blade")
+    if Game.chapter >= 2 then
         self:setArmor(1, "amber_card")
-        self:setArmor(2, "glowwrist")
-    elseif Game.chapter >= 4 then
-        self:setWeapon("saber10")
-        self:setArmor(1, "gingerguard")
-        self:setArmor(2, "glowwrist")
+        self:setArmor(2, "amber_card")
     end
 
     -- Default light world equipment item IDs (saves current equipment)
-    if Game.chapter <= 2 then
-        self.lw_weapon_default = "light/pencil"
-    elseif Game.chapter == 3 then
-        self.lw_weapon_default = "light/mech_pencil"
-    elseif Game.chapter >= 4 then
-        self.lw_weapon_default = "light/cactusneedle"
-    end
+    self.lw_weapon_default = "light/pencil"
     self.lw_armor_default = "light/bandage"
 
     -- Character color (for action box outline and hp bar)
@@ -176,7 +129,7 @@ function character:onLevelUp(level)
 end
 
 function character:onPowerSelect(menu)
-    if MathUtils.random() < ((Game.chapter == 1) and 0.02 or 0.04) then
+    if Utils.random() < ((Game.chapter == 1) and 0.02 or 0.04) then
         menu.kris_dog = true
     else
         menu.kris_dog = false
@@ -198,9 +151,6 @@ function character:drawPowerStat(index, x, y, menu)
         Draw.draw(icon, x+90, y+6, 0, 2, 2)
         if Game.chapter >= 2 then
             Draw.draw(icon, x+110, y+6, 0, 2, 2)
-        end
-        if Game.chapter >= 4 then
-            Draw.draw(icon, x+130, y+6, 0, 2, 2)
         end
         return true
     end

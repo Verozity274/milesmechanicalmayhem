@@ -10,8 +10,8 @@
 ---@overload fun(...) : FountainFloor
 local FountainFloor, super = Class(Event)
 
-function FountainFloor:init(x, y, shape)
-    super.init(self, x, y, shape)
+function FountainFloor:init(x, y, width, height)
+    super.init(self, x, y, width, height)
 
     self:setColor(0, 1, 0)
 

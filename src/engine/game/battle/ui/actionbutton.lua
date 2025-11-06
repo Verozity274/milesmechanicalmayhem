@@ -11,7 +11,6 @@ function ActionButton:init(type, battler, x, y)
     self.texture = Assets.getTexture("ui/battle/btn/"..type)
     self.hovered_texture = Assets.getTexture("ui/battle/btn/"..type.."_h")
     self.special_texture = Assets.getTexture("ui/battle/btn/"..type.."_a")
-    self.disabled_texture = Assets.getTexture("ui/battle/btn/"..type.."_d")
 
     self.width = self.texture:getWidth()
     self.height = self.texture:getHeight()
@@ -20,7 +19,6 @@ function ActionButton:init(type, battler, x, y)
 
     self.hovered = false
     self.selectable = true
-    self.disabled = false
 end
 
 function ActionButton:select()
@@ -52,7 +50,7 @@ function ActionButton:select()
                 ["data"] = spell,
                 ["callback"] = function(menu_item)
                     Game.battle.selected_xaction = spell
-                    Game.battle:setState("ENEMYSELECT", "XACT")
+                    Game.battle:setState("XACTENEMYSELECT", "SPELL")
                 end
             })
         end
@@ -76,7 +74,7 @@ function ActionButton:select()
                     ["data"] = spell,
                     ["callback"] = function(menu_item)
                         Game.battle.selected_xaction = spell
-                        Game.battle:setState("ENEMYSELECT", "XACT")
+                        Game.battle:setState("XACTENEMYSELECT", "SPELL")
                     end
                 })
             end
@@ -84,7 +82,6 @@ function ActionButton:select()
 
         -- Now, register SPELLs as menu items.
         for _,spell in ipairs(self.battler.chara:getSpells()) do
-            ---@type table|function
             local color = spell.color or {1, 1, 1, 1}
             if spell:hasTag("spare_tired") then
                 local has_tired = false
@@ -96,11 +93,6 @@ function ActionButton:select()
                 end
                 if has_tired then
                     color = {0, 178/255, 1, 1}
-                    if Game:getConfig("pacifyGlow") then
-                        color = function ()
-                            return Utils.mergeColor({0, 0.7, 1, 1}, COLORS.white, 0.5 + math.sin(Game.battle.pacify_glow_timer / 4) * 0.5)
-                        end
-                    end
                 end
             end
             Game.battle:addMenuItem({
@@ -161,7 +153,7 @@ function ActionButton:select()
     elseif self.type == "spare" then
         Game.battle:setState("ENEMYSELECT", "SPARE")
     elseif self.type == "defend" then
-        Game.battle:pushAction("DEFEND", nil, {tp = -Game.battle:getDefendTension(self.battler)})
+        Game.battle:pushAction("DEFEND", nil, {tp = -16})
     end
 end
 
@@ -203,9 +195,7 @@ function ActionButton:hasSpecial()
 end
 
 function ActionButton:draw()
-    if self.disabled then
-        Draw.draw(self.disabled_texture or self.texture)
-    elseif self.selectable and self.hovered then
+    if self.selectable and self.hovered then
         Draw.draw(self.hovered_texture or self.texture)
     else
         Draw.draw(self.texture)

@@ -3,14 +3,8 @@ local item, super = Class(HealItem, "dark_candy")
 function item:init()
     super.init(self)
 
-    local form = Game:getConfig("darkCandyForm")
-
     -- Display name
-    if form == "darker" then
-        self.name = "Darker Candy"
-    else
-        self.name = "Dark Candy"
-    end
+    self.name = "Dark Candy"
     -- Name displayed when used in battle (optional)
     self.use_name = nil
 
@@ -19,30 +13,18 @@ function item:init()
     -- Item icon (for equipment)
     self.icon = nil
 
-    -- Amount healed (HealItem variable)
-    if form == "darker" then
-        self.heal_amount = 120
-    else
-        self.heal_amount = 40
-    end
-
     -- Battle description
-    self.effect = "Heals\n" .. self.heal_amount .. "HP"
+    self.effect = "Heals\n40HP"
     -- Shop description
-    self.shop = "Star-shape\ncandy that\nheals " .. self.heal_amount .. "HP"
+    self.shop = "Star-shape\ncandy that\nheals 40HP"
     -- Menu description
-    if form == "darker" then
-        self.description = "A candy that has grown sweeter with time.\nSaid to taste like toasted marshmallow. +" .. self.heal_amount .. "HP"
-    else
-        self.description = "Heals " .. self.heal_amount .. " HP. A red-and-black star\nthat tastes like marshmallows."
-    end
+    self.description = "Heals 40 HP. A red-and-black star\nthat tastes like marshmallows."
+
+    -- Amount healed (HealItem variable)
+    self.heal_amount = 40
 
     -- Default shop price (sell price is halved)
-    if form == "darker" then
-        self.price = 120
-    else
-        self.price = 25
-    end
+    self.price = 25
     -- Whether the item can be sold
     self.can_sell = true
 

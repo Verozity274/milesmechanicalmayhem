@@ -10,8 +10,8 @@
 ---@overload fun(...) : Outline
 local Outline, super = Class(Event)
 
-function Outline:init(x, y, shape)
-    super.init(self, x, y, shape)
+function Outline:init(x, y, w, h)
+    super.init(self, x, y, w, h)
 
     self.solid = false
 

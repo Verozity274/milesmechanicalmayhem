@@ -10,8 +10,8 @@
 ---@overload fun(...) : SlideArea
 local SlideArea, super = Class(Event)
 
-function SlideArea:init(x, y, shape, properties)
-    super.init(self, x, y, shape)
+function SlideArea:init(x, y, w, h, properties)
+    super.init(self, x, y, w, h)
 
     self.lock_movement = properties["lock"] or false
 end

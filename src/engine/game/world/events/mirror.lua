@@ -12,8 +12,8 @@
 ---@overload fun(...) : MirrorArea
 local MirrorArea, super = Class(Event)
 
-function MirrorArea:init(x, y, shape, properties)
-    super.init(self, x, y, shape)
+function MirrorArea:init(x, y, w, h, properties)
+    super.init(self, x, y, w, h)
 
     properties = properties or {}
 
@@ -46,18 +46,12 @@ function MirrorArea:drawCharacter(chara)
     love.graphics.translate(0, -oyd + self.offset)
     local oldsprite = string.sub(chara.sprite.texture_path, #chara.sprite.path + 2)
     local t = Utils.split(oldsprite, "_")
-    local pathless = ""
-	for i=1, #t-1 do
-		pathless = pathless .. "_" .. t[i]
-	end
-	pathless = string.sub(pathless, 2)
-	local frame = t[#t]
+    local pathless = t[1]
+    local frame = t[2]
     local newsprite = oldsprite
     local mirror = chara.actor:getMirrorSprites()
     if mirror and mirror[pathless] then
-        if frame then
-			newsprite = mirror[pathless] .. "_" .. frame
-		end
+        newsprite = mirror[pathless] .. "_" .. frame
     end
     chara.sprite:setTextureExact(chara.actor.path .. "/" .. newsprite)
     chara:draw()

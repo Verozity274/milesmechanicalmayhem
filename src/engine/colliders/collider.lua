@@ -2,14 +2,6 @@
 ---@overload fun(...) : Collider
 local Collider = Class()
 
----@class Collider.Mode
----@field invert boolean?
----@field inside boolean?
-
----@param parent Object
----@param x number?
----@param y number?
----@param mode Collider.Mode
 function Collider:init(parent, x, y, mode)
     self.parent = parent
 
@@ -84,7 +76,7 @@ end
 function Collider:getLocalPoints(tf1,tf2, ...)
     local points = {...}
     if type(points[1]) == "table" then
-        points = TableUtils.copy(points[1])
+        points = Utils.copy(points[1])
     end
     if type(points[1]) == "table" then
         if tf2 then
@@ -115,26 +107,6 @@ end
 
 function Collider:collidesWith(other)
     return self:applyInvert(other, false)
-end
-
-function Collider:clicked(button)
-    if not button then
-        local used_button = 0
-        for i=1, Input.mouse_button_max do
-            local success, success_button = self:clicked(i)
-            used_button = math.max(used_button, success_button)
-            if success then
-                return true, success_button
-            end
-        end
-        return false, used_button
-    end
-    local clicked, x, y, presses = Input.mousePressed(button)
-    if not clicked then
-        return false, 0
-    end
-    local point = PointCollider(nil, x, y)
-    return self:collidesWith(point), button
 end
 
 function Collider:drawFor(obj, ...)

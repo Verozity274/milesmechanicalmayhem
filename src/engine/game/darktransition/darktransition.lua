@@ -92,7 +92,6 @@ function DarkTransition:init(final_y, options)
 
     self.final_y               = final_y or (SCREEN_HEIGHT / 2)
     self.sparkles              = options["sparkles"] or 0
-    self.sparkles_character    = options["sparkles_character"] or 1
     self.sparestar             = Assets.getFrames("effects/spare/star")
     self.dtrans_square         = Assets.newSound("dtrans_square")
     self.head_object_sprite    = Assets.getTexture(options["head_object_sprite"] or "misc/trash_ball")
@@ -543,6 +542,7 @@ function DarkTransition:draw()
                 data.sprite_2:set("white")
                 data.sprite_3:set("dark")
                 data.top = data.sprite_3.texture:getHeight()
+                print(data.top)
 
                 data.sprite_1.cutout_bottom = 0
                 data.sprite_2.cutout_top = data.top
@@ -581,7 +581,7 @@ function DarkTransition:draw()
             end
 
             for i = 1, self.sparkles do
-                local sparkle = DarkTransitionSparkle(self.sparestar, self.character_data[self.sparkles_character].x + 15, self.character_data[self.sparkles_character].y + 15)
+                local sparkle = DarkTransitionSparkle(self.sparestar, self.kris_x + 15, self.kris_y + 15)
                 sparkle:play(1 / 15)
                 -- We need to get the stage...
                 self:addChild(sparkle)
@@ -606,7 +606,7 @@ function DarkTransition:draw()
                 end
 
                 if data.top >= 2 then
-                    local x = ((data.x + 3) + math.random(data.sprite_3.texture:getWidth() - 6))
+                    local x = ((data.x + 3) + math.random((data.sprite_1.width - 6)))
                     local y = (data.y + data.top)
 
                     for _ = 1, particle_amount do

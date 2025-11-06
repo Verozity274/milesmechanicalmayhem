@@ -23,13 +23,8 @@
 ---@overload fun(...) : Interactable
 local Interactable, super = Class(Event)
 
----@param x?            number
----@param y?            number
----@param shape?        { [1]: number, [2]: number, [3]: table? }
----@param properties?   table
-function Interactable:init(x, y, shape, properties)
-    shape = shape or {TILE_WIDTH, TILE_HEIGHT}
-    super.init(self, x, y, shape)
+function Interactable:init(x, y, width, height, properties)
+    super.init(self, x, y, width or TILE_WIDTH, height or TILE_HEIGHT)
 
     properties = properties or {}
 
@@ -77,7 +72,7 @@ function Interactable:onInteract(player, dir)
     else
         cutscene = self.world:startCutscene(function(c)
             local text = self.text
-            local text_index = MathUtils.clamp(self.interact_count, 1, #text)
+            local text_index = Utils.clamp(self.interact_count, 1, #text)
             if type(text[text_index]) == "table" then
                 text = text[text_index]
             end

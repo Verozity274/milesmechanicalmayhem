@@ -24,7 +24,7 @@ function BarComponent:getProgress()
     if (type(self.progress) == "function") then
         progress = self.progress()
     end
-    return MathUtils.clamp(progress, 0, 1)
+    return Utils.clamp(progress, 0, 1)
 end
 
 function BarComponent:draw()

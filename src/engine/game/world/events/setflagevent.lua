@@ -11,8 +11,8 @@
 ---@overload fun(...) : SetFlagEvent
 local SetFlagEvent, super = Class(Event, "setflag")
 
-function SetFlagEvent:init(x, y, shape, properties)
-    super.init(self, x, y, shape)
+function SetFlagEvent:init(x, y, width, height, properties)
+    super.init(self, x, y, width, height)
 
     properties = properties or {}
 
